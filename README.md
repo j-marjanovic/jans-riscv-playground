@@ -98,3 +98,23 @@ Disassembly of section .text:
    100f2:       0a0090ef                jal     ra,19192 <atexit>
    100f6:       0ec000ef                jal     ra,101e2 <__libc_init_array>
 ```
+
+#### Register names
+
+https://riscv.org/wp-content/uploads/2015/01/riscv-calling.pdf
+
+#### GCC options
+
+https://gcc.gnu.org/onlinedocs/gcc/RISC-V-Options.html
+
+https://www.sifive.com/blog/all-aboard-part-1-compiler-args
+
+#### GCC
+
+https://github.com/riscv/riscv-gnu-toolchain.git
+
+https://stackoverflow.com/a/32538388
+
+https://github.com/riscv/riscv-gnu-toolchain/issues/87
+
+https://github.com/cliffordwolf/picorv32#building-a-pure-rv32i-toolchain
