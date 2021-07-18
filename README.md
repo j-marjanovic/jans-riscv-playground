@@ -64,3 +64,37 @@ https://blog.k3170makan.com/2018/09/introduction-to-elf-file-format-part.html
 - `.symtab`
 - `.strtab`
 - `.shstrtab`
+
+```console
+$ riscv64-unknown-elf-objdump --disassemble-all ../software/hello_world | head -n 30
+
+../software/hello_world:     file format elf64-littleriscv
+
+
+Disassembly of section .text:
+
+00000000000100b0 <register_fini>:
+   100b0:       00000793                li      a5,0
+   100b4:       c799                    beqz    a5,100c2 <register_fini+0x12>
+   100b6:       00002517                auipc   a0,0x2
+   100ba:       62250513                addi    a0,a0,1570 # 126d8 <__libc_fini_array>
+   100be:       0d40906f                j       19192 <atexit>
+   100c2:       8082                    ret
+
+00000000000100c4 <_start>:
+   100c4:       0000f197                auipc   gp,0xf
+   100c8:       05c18193                addi    gp,gp,92 # 1f120 <__global_pointer$>
+   100cc:       76818513                addi    a0,gp,1896 # 1f888 <_PathLocale>
+   100d0:       00010617                auipc   a2,0x10
+   100d4:       85060613                addi    a2,a2,-1968 # 1f920 <__BSS_END__>
+   100d8:       8e09                    sub     a2,a2,a0
+   100da:       4581                    li      a1,0
+   100dc:       170000ef                jal     ra,1024c <memset>
+   100e0:       00009517                auipc   a0,0x9
+   100e4:       0b250513                addi    a0,a0,178 # 19192 <atexit>
+   100e8:       c519                    beqz    a0,100f6 <_start+0x32>
+   100ea:       00002517                auipc   a0,0x2
+   100ee:       5ee50513                addi    a0,a0,1518 # 126d8 <__libc_fini_array>
+   100f2:       0a0090ef                jal     ra,19192 <atexit>
+   100f6:       0ec000ef                jal     ra,101e2 <__libc_init_array>
+```
