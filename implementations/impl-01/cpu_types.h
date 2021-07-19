@@ -19,3 +19,5 @@ typedef struct {
   t_mem_ops *mem_ops;
   void *mem_impl;
 } t_cpu;
+
+typedef void (*t_cpu_op)(t_cpu *cpu, uint32_t instr);

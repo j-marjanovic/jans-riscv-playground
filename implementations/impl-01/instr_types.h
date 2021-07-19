@@ -23,6 +23,24 @@ typedef struct __attribute__((packed)) {
 
 typedef struct __attribute__((packed)) {
   uint8_t opcode : 7;
+  uint8_t imm4_0 : 5;
+  uint8_t funct3 : 3;
+  uint8_t rs1 : 5;
+  uint8_t rs2 : 5;
+  uint32_t imm11_5 : 7;
+} instr_Stype;
+
+uint32_t instr_stype_imm(instr_Stype *instr) {
+  uint32_t tmp = 0;
+
+  tmp |= instr->imm4_0;
+  tmp |= instr->imm11_5 << 5;
+
+  return tmp;
+}
+
+typedef struct __attribute__((packed)) {
+  uint8_t opcode : 7;
   uint32_t imm11 : 1;
   uint32_t imm4_1 : 4;
   uint8_t funct3 : 3;
@@ -69,8 +87,9 @@ uint32_t instr_jtype_imm(instr_Jtype *instr) {
   return tmp;
 }
 
-_Static_assert(sizeof(instr_Rtype) == 4, "size of Rtype");
-_Static_assert(sizeof(instr_Itype) == 4, "size of Itype");
-_Static_assert(sizeof(instr_Btype) == 4, "size of Btype");
-_Static_assert(sizeof(instr_Utype) == 4, "size of Utype");
-_Static_assert(sizeof(instr_Jtype) == 4, "size of Jtype");
+_Static_assert(sizeof(instr_Rtype) == 4, "size of R-type");
+_Static_assert(sizeof(instr_Itype) == 4, "size of I-type");
+_Static_assert(sizeof(instr_Stype) == 4, "size of S-type");
+_Static_assert(sizeof(instr_Btype) == 4, "size of B-type");
+_Static_assert(sizeof(instr_Utype) == 4, "size of U-type");
+_Static_assert(sizeof(instr_Jtype) == 4, "size of J-type");
