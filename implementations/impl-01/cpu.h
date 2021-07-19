@@ -24,17 +24,15 @@ void create_cpu(t_cpu *cpu, void *mem_impl, t_mem_ops *mem_ops) {
 }
 
 void cpu_exec_instr(t_cpu *cpu) {
-  uint32_t instr = cpu->mem_ops->read(cpu->mem_impl, cpu->regs.pc);
+  uint32_t instr = cpu->mem_ops->read32(cpu->mem_impl, cpu->regs.pc, 1);
   printf("[decoder]   loaded instr = 0x%08x\n", instr);
 
   uint8_t opcode = instr & 0x7F;
-  printf("[decoder]   opcode = 0x%x\n", opcode);
-
   cpu_ops[opcode](cpu, instr);
-
   cpu->regs.x[0] = 0;
 
   cpu_dump_regs(cpu);
+  cpu->mem_ops->print_diag(cpu->mem_impl);
 
   // for diagnostics, store previous register state
   for (unsigned int i = 0; i < 32; i++) {

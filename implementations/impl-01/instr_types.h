@@ -6,27 +6,27 @@
 
 typedef struct __attribute__((packed)) {
   uint8_t opcode : 7;
-  uint8_t rd : 5;
+  uint16_t rd : 5;
   uint8_t funct3 : 3;
-  uint8_t rs1 : 5;
-  uint8_t rs2 : 5;
+  uint16_t rs1 : 5;
+  uint16_t rs2 : 5;
   uint8_t funct7 : 7;
 } instr_Rtype;
 
 typedef struct __attribute__((packed)) {
   uint8_t opcode : 7;
-  uint8_t rd : 5;
-  uint8_t funct3 : 3;
-  uint8_t rs1 : 5;
+  uint16_t rd : 5;
+  uint16_t funct3 : 3;
+  uint16_t rs1 : 5;
   uint32_t imm : 12;
 } instr_Itype;
 
 typedef struct __attribute__((packed)) {
   uint8_t opcode : 7;
-  uint8_t imm4_0 : 5;
-  uint8_t funct3 : 3;
-  uint8_t rs1 : 5;
-  uint8_t rs2 : 5;
+  uint16_t imm4_0 : 5;
+  uint16_t funct3 : 3;
+  uint16_t rs1 : 5;
+  uint16_t rs2 : 5;
   uint32_t imm11_5 : 7;
 } instr_Stype;
 
@@ -43,9 +43,9 @@ typedef struct __attribute__((packed)) {
   uint8_t opcode : 7;
   uint32_t imm11 : 1;
   uint32_t imm4_1 : 4;
-  uint8_t funct3 : 3;
-  uint8_t rs1 : 5;
-  uint8_t rs2 : 5;
+  uint16_t funct3 : 3;
+  uint16_t rs1 : 5;
+  uint16_t rs2 : 5;
   uint32_t imm10_5 : 6;
   uint32_t imm12 : 1;
 } instr_Btype;
@@ -63,13 +63,13 @@ uint32_t instr_btype_imm(instr_Btype *instr) {
 
 typedef struct __attribute__((packed)) {
   uint8_t opcode : 7;
-  uint8_t rd : 5;
+  uint16_t rd : 5;
   uint32_t imm : 20;
 } instr_Utype;
 
 typedef struct __attribute__((packed)) {
   uint8_t opcode : 7;
-  uint8_t rd : 5;
+  uint16_t rd : 5;
   uint32_t imm19_12 : 8;
   uint32_t imm11 : 1;
   uint32_t imm10_1 : 10;

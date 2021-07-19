@@ -26,20 +26,27 @@ int main() {
 
   off_t end = lseek(fd, 0, SEEK_END);
   lseek(fd, TEXT_SECTION_OFFSET, SEEK_SET);
-  size_t instr_size = end - TEXT_SECTION_OFFSET;
+  size_t instrs_size = end - TEXT_SECTION_OFFSET;
 
-  uint8_t *instr = malloc(instr_size);
-  assert(instr);
+  uint8_t *instrs = malloc(instrs_size);
+  assert(instrs);
 
-  int bytes_read = read(fd, instr, instr_size);
+  int bytes_read = read(fd, instrs, instrs_size);
   printf("bytes read = %d\n", bytes_read);
 
   t_array_mem mem_impl;
-  mem_impl.size = instr_size;
-  mem_impl.mem = instr;
+  array_mem_init(&mem_impl, instrs, instrs_size);
 
   t_cpu cpu;
-  t_mem_ops mem_ops = {.read = array_mem_read, .write = array_mem_write};
+  t_mem_ops mem_ops = {
+      .read32 = array_mem_read32,
+      .read16 = array_mem_read16,
+      .read8 = array_mem_read8,
+      .write32 = array_mem_write32,
+      .write16 = array_mem_write16,
+      .write8 = array_mem_write8,
+      .print_diag = array_mem_print_diag,
+  };
 
   create_cpu(&cpu, (void *)&mem_impl, &mem_ops);
 

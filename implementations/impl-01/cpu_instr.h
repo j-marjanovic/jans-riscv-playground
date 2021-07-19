@@ -109,6 +109,16 @@ void op_branch(t_cpu *cpu, uint32_t instr_raw) {
   }
 }
 
+void op_load(t_cpu *cpu, uint32_t instr_raw) {
+  instr_Itype instr;
+  memcpy(&instr, &instr_raw, 4);
+
+  printf("[op]        group LOAD, rd = %d, funct3 = %d, rs1 = %d, imm = 0x%x\n",
+         instr.rd, instr.funct3, instr.rs1, instr.imm);
+
+  // TODO: implement the load
+}
+
 void op_store(t_cpu *cpu, uint32_t instr_raw) {
   instr_Stype instr;
   memcpy(&instr, &instr_raw, 4);
@@ -202,7 +212,7 @@ void op_alu(t_cpu *cpu, uint32_t instr_raw) {
 }
 
 t_cpu_op cpu_ops[] = {
-    [AUIPC] = op_auipc,    [JAL] = op_jal,      [JALR] = op_jalr,
-    [_BRANCH] = op_branch, [_STORE] = op_store, [_ALU_IMM] = op_alu_imm,
-    [_ALU_R] = op_alu,
+    [AUIPC] = op_auipc,      [JAL] = op_jal,    [JALR] = op_jalr,
+    [_BRANCH] = op_branch,   [_LOAD] = op_load, [_STORE] = op_store,
+    [_ALU_IMM] = op_alu_imm, [_ALU_R] = op_alu,
 };
