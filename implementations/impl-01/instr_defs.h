@@ -4,6 +4,7 @@
 #pragma once
 
 enum RV32I_INSTR {
+  LUI = 0b0110111,
   AUIPC = 0b0010111,
   JAL = 0b1101111,
   JALR = 0b1100111,

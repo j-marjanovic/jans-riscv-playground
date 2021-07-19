@@ -45,10 +45,18 @@ void array_mem_print_diag(void *mem_impl) {
     return;
   }
 
-  printf("Last %d memory operations:\n", NR_DIAG_MSGS);
+  printf("Last %d memory operations (last first):\n", NR_DIAG_MSGS);
+
+  int cur_pos = arr_mem->diag_wr_ptr - 1;
+  if (cur_pos < 0) {
+    cur_pos = NR_DIAG_MSGS - 1;
+  }
 
   for (int i = 0; i < arr_mem->diag_nr_els; i++) {
-    printf("  %2d: %s\n", i, arr_mem->diag_msgs[i]);
+    printf("  %2d: %s\n", i, arr_mem->diag_msgs[cur_pos]);
+    if (--cur_pos < 0) {
+      cur_pos = NR_DIAG_MSGS - 1;
+    }
   }
   printf(KNRM);
 }
@@ -97,7 +105,7 @@ uint32_t array_mem_read32(void *mem_impl, uint32_t addr, int instr) {
   printf("[array_mem] read32 from 0x%x = 0x%x\n", addr, data);
   // ignore instr fetch from the diag messages
   if (!instr) {
-    _array_mem_add_diag_msg(arr_mem, "read word to 0x%x = 0x%x", addr, data);
+    _array_mem_add_diag_msg(arr_mem, "read word from 0x%x = 0x%x", addr, data);
   }
 
   return data;
@@ -112,7 +120,8 @@ uint16_t array_mem_read16(void *mem_impl, uint32_t addr) {
   memcpy(&data, (uint8_t *)arr_mem->mem + addr, 2);
 
   printf("[array_mem] read16 from 0x%x = 0x%x\n", addr, data);
-  _array_mem_add_diag_msg(arr_mem, "read halfword to 0x%x = 0x%x", addr, data);
+  _array_mem_add_diag_msg(arr_mem, "read halfword from 0x%x = 0x%x", addr,
+                          data);
 
   return data;
 }
@@ -126,7 +135,7 @@ uint8_t array_mem_read8(void *mem_impl, uint32_t addr) {
   memcpy(&data, (uint8_t *)arr_mem->mem + addr, 1);
 
   printf("[array_mem] read8 from 0x%x = 0x%x\n", addr, data);
-  _array_mem_add_diag_msg(arr_mem, "read byte to 0x%x = 0x%x", addr, data);
+  _array_mem_add_diag_msg(arr_mem, "read byte from 0x%x = 0x%x", addr, data);
 
   return data;
 }

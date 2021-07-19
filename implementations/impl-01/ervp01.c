@@ -50,7 +50,7 @@ int main() {
 
   create_cpu(&cpu, (void *)&mem_impl, &mem_ops);
 
-  const int NR_INSTR_TO_EXEC = 26;
+  const int NR_INSTR_TO_EXEC = 200;
   for (int i = 0; i < NR_INSTR_TO_EXEC; i++) {
     cpu_exec_instr(&cpu);
   }
