@@ -7,10 +7,10 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "instr_types.h"
-#include "cpu_types.h"
 #include "cpu_instr.h"
+#include "cpu_types.h"
 #include "cpu_utils.h"
+#include "instr_types.h"
 
 void create_cpu(t_cpu *cpu, void *mem_impl, t_mem_ops *mem_ops) {
   for (unsigned int i = 0; i < 32; i++) {

@@ -27,8 +27,9 @@ typedef struct __attribute__((packed)) {
   uint32_t imm4_1 : 4;
   uint8_t funct3 : 3;
   uint8_t rs1 : 5;
-  uint32_t imm10_5 : 4;
-  uint32_t imm12 : 4;
+  uint8_t rs2 : 5;
+  uint32_t imm10_5 : 6;
+  uint32_t imm12 : 1;
 } instr_Btype;
 
 uint32_t instr_btype_imm(instr_Btype *instr) {
