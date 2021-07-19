@@ -18,6 +18,15 @@ int32_t sign_extend_12bit(uint32_t imm) {
   return imm | mask;
 }
 
+int32_t sign_extend_21bit(uint32_t imm) {
+  const uint32_t mask_const = ((1 << 11) - 1) << 21;
+  uint32_t bit = (imm >> 20) & 1;
+
+  uint32_t mask = mask_const * bit;
+
+  return imm | mask;
+}
+
 uint32_t sign_extend_12bit_unsigned(uint32_t imm) {
   return (uint32_t)sign_extend_12bit(imm);
 }
@@ -41,7 +50,7 @@ void op_jal(t_cpu *cpu, uint32_t instr_raw) {
   printf("[op]        JAL, rd = %d, imm = 0x%x\n", instr.rd, imm);
 
   cpu->regs.x[1] = cpu->regs.pc + 4;
-  cpu->regs.pc += imm; // TODO: sign extend
+  cpu->regs.pc += sign_extend_21bit(imm);
 }
 
 void op_jalr(t_cpu *cpu, uint32_t instr_raw) {
@@ -51,7 +60,7 @@ void op_jalr(t_cpu *cpu, uint32_t instr_raw) {
   printf("[op]        JALR, rd = %d, funct3 = %d, rs1 = %d, imm = 0x%x\n",
          instr.rd, instr.funct3, instr.rs1, instr.imm);
 
-  cpu->regs.x[1] = cpu->regs.pc + 4;
+  cpu->regs.x[instr.rd] = cpu->regs.pc + 4;
   cpu->regs.pc += cpu->regs.x[instr.rs1] + sign_extend_12bit(instr.imm);
 }
 
@@ -69,6 +78,15 @@ void op_branch(t_cpu *cpu, uint32_t instr_raw) {
   switch (instr.funct3) {
   case BNE:
     if (cpu->regs.x[instr.rs1] != cpu->regs.x[instr.rs2]) {
+      printf("[branch]    branch taken\n");
+      cpu->regs.pc += imm;
+    } else {
+      printf("[branch]    branch skipped\n");
+      cpu->regs.pc += 4;
+    }
+    break;
+  case BGE:
+    if ((int32_t)cpu->regs.x[instr.rs1] >= (int32_t)cpu->regs.x[instr.rs2]) {
       printf("[branch]    branch taken\n");
       cpu->regs.pc += imm;
     } else {

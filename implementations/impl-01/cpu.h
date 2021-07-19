@@ -32,6 +32,8 @@ void cpu_exec_instr(t_cpu *cpu) {
 
   cpu_ops[opcode](cpu, instr);
 
+  cpu->regs.x[0] = 0;
+
   cpu_dump_regs(cpu);
 
   // for diagnostics, store previous register state
