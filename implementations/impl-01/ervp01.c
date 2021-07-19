@@ -22,9 +22,11 @@ int main() {
     return EXIT_FAILURE;
   }
 
+  const int TEXT_SECTION_OFFSET = 0x8c; // TODO: implement a proper ELF loader
+
   off_t end = lseek(fd, 0, SEEK_END);
-  lseek(fd, 0x8c, SEEK_SET);
-  size_t instr_size = end - 0x8c;
+  lseek(fd, TEXT_SECTION_OFFSET, SEEK_SET);
+  size_t instr_size = end - TEXT_SECTION_OFFSET;
 
   uint8_t *instr = malloc(instr_size);
   assert(instr);
