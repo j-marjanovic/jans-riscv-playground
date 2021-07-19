@@ -15,6 +15,7 @@
 void create_cpu(t_cpu *cpu, void *mem_impl, t_mem_ops *mem_ops) {
   for (unsigned int i = 0; i < 32; i++) {
     cpu->regs.x[i] = 0;
+    cpu->_regs_prev.x[i] = 0;
   }
   cpu->regs.pc = 0;
 
@@ -32,4 +33,9 @@ void cpu_exec_instr(t_cpu *cpu) {
   cpu_ops[opcode](cpu, instr);
 
   cpu_dump_regs(cpu);
+
+  // for diagnostics, store previous register state
+  for (unsigned int i = 0; i < 32; i++) {
+    cpu->_regs_prev.x[i] = cpu->regs.x[i];
+  }
 }

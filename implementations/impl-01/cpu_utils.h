@@ -6,6 +6,8 @@
 
 #define KNRM "\x1B[0m"
 #define KGRY "\x1B[38;5;240m"
+#define KORA "\x1B[38;5;208m"
+#define KCYN "\x1B[36m"
 
 void cpu_dump_regs(t_cpu *cpu) {
   printf("----------------------------------------------\n");
@@ -23,11 +25,16 @@ void cpu_dump_regs(t_cpu *cpu) {
     } else {
       printf(KGRY);
     }
+
+    if (cpu->_regs_prev.x[i] != cpu->regs.x[i]) {
+      printf(KORA);
+    }
+
     printf("%08x ", cpu->regs.x[i]);
     printf(KNRM);
   }
 
   printf("\n");
-  printf(" pc = %08x\n", cpu->regs.pc);
+  printf(" pc = " KCYN "%08x\n" KNRM, cpu->regs.pc);
   printf("----------------------------------------------\n");
 }
