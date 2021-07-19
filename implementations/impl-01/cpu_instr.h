@@ -8,20 +8,33 @@
 #include "instr_defs.h"
 #include "instr_types.h"
 
+int32_t sign_extend_8bit(uint32_t data) {
+  const uint32_t mask_const = ((1 << 24) - 1) << 8;
+  uint32_t bit = (data >> 7) & 1;
+  uint32_t mask = mask_const * bit;
+
+  return data | mask;
+}
+
 int32_t sign_extend_12bit(uint32_t imm) {
   const uint32_t mask_const = ((1 << 20) - 1) << 12;
   uint32_t bit = (imm >> 11) & 1;
-
   uint32_t mask = mask_const * bit;
-  ;
 
   return imm | mask;
+}
+
+int32_t sign_extend_16bit(uint32_t data) {
+  const uint32_t mask_const = ((1 << 16) - 1) << 16;
+  uint32_t bit = (data >> 15) & 1;
+  uint32_t mask = mask_const * bit;
+
+  return data | mask;
 }
 
 int32_t sign_extend_21bit(uint32_t imm) {
   const uint32_t mask_const = ((1 << 11) - 1) << 21;
   uint32_t bit = (imm >> 20) & 1;
-
   uint32_t mask = mask_const * bit;
 
   return imm | mask;
@@ -113,10 +126,37 @@ void op_load(t_cpu *cpu, uint32_t instr_raw) {
   instr_Itype instr;
   memcpy(&instr, &instr_raw, 4);
 
-  printf("[op]        group LOAD, rd = %d, funct3 = %d, rs1 = %d, imm = 0x%x\n",
+  printf("[op]        LOAD, rd = %d, funct3 = %d, rs1 = %d, imm = 0x%x\n",
          instr.rd, instr.funct3, instr.rs1, instr.imm);
 
-  // TODO: implement the load
+  uint32_t load_addr = cpu->regs.x[instr.rs1] + sign_extend_12bit(instr.imm);
+  printf("[load]      addr = %08x\n", load_addr);
+
+  uint32_t data;
+
+  switch (instr.funct3) {
+  case 0: // LB
+    data = sign_extend_8bit(cpu->mem_ops->read8(cpu->mem_impl, load_addr));
+    break;
+  case 1: // LH
+    data = sign_extend_16bit(cpu->mem_ops->read16(cpu->mem_impl, load_addr));
+    break;
+  case 2: // LW
+    data = cpu->mem_ops->read32(cpu->mem_impl, load_addr, 0);
+    break;
+  case 4: // LBU
+    data = cpu->mem_ops->read8(cpu->mem_impl, load_addr);
+    break;
+  case 5: // LHU
+    data = cpu->mem_ops->read16(cpu->mem_impl, load_addr);
+    break;
+  default:
+    printf("ERROR: unrecognized LOAD instruction");
+    abort();
+  }
+
+  cpu->regs.x[instr.rd] = data;
+  cpu->regs.pc += 4;
 }
 
 void op_store(t_cpu *cpu, uint32_t instr_raw) {
@@ -124,13 +164,28 @@ void op_store(t_cpu *cpu, uint32_t instr_raw) {
   memcpy(&instr, &instr_raw, 4);
 
   uint32_t imm = instr_stype_imm(&instr);
-  printf("[op]        group STORE, funct3 = %d, rs1 = %d, rs2 = %d, imm "
-         "= 0x%x\n",
+  printf("[op]        STORE, funct3 = %d, rs1 = %d, rs2 = %d, imm = 0x%x\n",
          instr.funct3, instr.rs1, instr.rs2, imm);
 
-  // funct3: 0 = bytes, 1 - halfword, 2 - word
-  // TODO: implement the store
+  uint32_t store_addr = cpu->regs.x[instr.rs1] + sign_extend_12bit(imm);
+  printf("[store]      addr = %08x\n", store_addr);
 
+  uint32_t data = cpu->regs.x[instr.rs2];
+
+  switch (instr.funct3) {
+  case 0: // SB
+    cpu->mem_ops->write8(cpu->mem_impl, store_addr, data);
+    break;
+  case 1: // SH
+    cpu->mem_ops->write16(cpu->mem_impl, store_addr, data);
+    break;
+  case 2: // SW
+    cpu->mem_ops->write32(cpu->mem_impl, store_addr, data);
+    break;
+  default:
+    printf("ERROR: unrecognized STORE instruction");
+    abort();
+  }
   cpu->regs.pc += 4;
 }
 
