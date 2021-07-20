@@ -47,10 +47,27 @@ int main() {
 
   cpu_create(&cpu, (void *)&mem_impl, &mem_ops);
   cpu.regs.pc = entry_point;
-  cpu.regs.x[2] = 0x407ffff0; // TODO: figure out where to get this?
   cpu_register_symtab(&cpu, (void *)first_symtab, symtab_get_name);
 
-  const int NR_INSTR_TO_EXEC = 1000;
+  // TODO: figure out where to get this?
+  cpu.regs.x[2] = 0x407ffff0;
+  mem_write32(&mem_impl, 0x407ffff0, 0x00000001);
+  mem_write32(&mem_impl, 0x407ffff4, 0x408001a9);
+  mem_write32(&mem_impl, 0x407ffff8, 0x00000000);
+  mem_write32(&mem_impl, 0x407ffffc, 0x408001c0);
+
+  /*
+  (gdb) x 0x407ffff0
+  0x407ffff0:     0x00000001
+  (gdb) x 0x407ffff4
+  0x407ffff4:     0x408001a9
+  (gdb) x 0x407ffff8
+  0x407ffff8:     0x00000000
+  (gdb) x 0x407ffffc
+  0x407ffffc:     0x408001c0
+  */
+
+  const int NR_INSTR_TO_EXEC = 587;
   for (int i = 0; i < NR_INSTR_TO_EXEC; i++) {
     cpu_exec_instr(&cpu);
   }

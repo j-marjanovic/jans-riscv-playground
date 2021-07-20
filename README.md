@@ -6,6 +6,31 @@ Welcome to my playground for the RISC-V!
 
 ### 2021-07-20
 
+#### ECALL
+
+```
+│   0x200ac <_exit+16>      addi    sp,sp,-16
+│   0x200b0 <_exit+20>      sw      s0,8(sp)
+│   0x200b4 <_exit+24>      mv      s0,a0
+│   0x200b8 <_exit+28>      sw      ra,12(sp)
+│   0x200bc <_exit+32>      neg     s0,s0
+│   0x200c0 <_exit+36>      jal     ra,0x1d1c4 <__errno>
+│   0x200c4 <_exit+40>      sw      s0,0(a0)
+│   0x200c8 <_exit+44>      j       0x200c8 <_exit+44>
+│   0x200cc <_fstat>        addi    sp,sp,-144
+│   0x200d0 <_fstat+4>      sw      s1,132(sp)
+│   0x200d4 <_fstat+8>      sw      ra,140(sp)
+│   0x200d8 <_fstat+12>     mv      s1,a1
+│  >0x200dc <_fstat+16>     sw      s0,136(sp)
+│   0x200e0 <_fstat+20>     li      a7,80
+│   0x200e4 <_fstat+24>     mv      a1,sp
+│   0x200e8 <_fstat+28>     ecall
+│   0x200ec <_fstat+32>     mv      s0,a0
+│   0x200f0 <_fstat+36>     bltz    a0,0x20118 <_fstat+76>
+```
+
+https://github.com/riscvarchive/riscv-linux/blob/32b1573d1f118844d859341d095e005ca5ba572e/arch/riscv/include/asm/sbi.h#L30
+
 #### GDB + QEMU
 
 https://qemu-project.gitlab.io/qemu/system/gdb.html
@@ -58,6 +83,7 @@ Important commands:
 * `layout asm`
 * `layout regs`
 * `stepi`
+* `tui new-layout example {-horizontal regs 1 asm 1} 2 status 0 cmd 1`
 
 #### Symbol table in ELF
 
@@ -77,7 +103,7 @@ https://blog.k3170makan.com/2018/09/introduction-to-elf-format-elf-header.html
 ```console
 $ riscv64-unknown-elf-readelf -h ../software/hello_world
 ELF Header:
-  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00 
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
   Class:                             ELF64
   Data:                              2's complement, little endian
   Version:                           1 (current)

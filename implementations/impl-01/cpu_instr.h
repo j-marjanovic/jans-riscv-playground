@@ -96,6 +96,11 @@ void op_jalr(t_cpu *cpu, uint32_t instr_raw) {
   cpu->regs.pc = cpu->regs.x[instr.rs1] + sign_extend_12bit(instr.imm);
 }
 
+void op_system(t_cpu *cpu, uint32_t instr_raw) {
+  printf("TODO - not sure what to do here\n");
+  cpu->regs.pc += 4;
+}
+
 void op_branch(t_cpu *cpu, uint32_t instr_raw) {
   instr_Btype instr;
   memcpy(&instr, &instr_raw, 4);
@@ -361,7 +366,8 @@ void op_alu(t_cpu *cpu, uint32_t instr_raw) {
 }
 
 t_cpu_op cpu_ops[] = {
-    [LUI] = op_lui,      [AUIPC] = op_auipc,      [JAL] = op_jal,
-    [JALR] = op_jalr,    [_BRANCH] = op_branch,   [_LOAD] = op_load,
-    [_STORE] = op_store, [_ALU_IMM] = op_alu_imm, [_ALU_R] = op_alu,
+    [LUI] = op_lui,    [AUIPC] = op_auipc,   [JAL] = op_jal,
+    [JALR] = op_jalr,  [SYSTEM] = op_system, [_BRANCH] = op_branch,
+    [_LOAD] = op_load, [_STORE] = op_store,  [_ALU_IMM] = op_alu_imm,
+    [_ALU_R] = op_alu,
 };
