@@ -26,9 +26,9 @@ struct __attribute__((packed)) elf_header {
     uint16_t e_type;
     uint16_t e_machine;
     uint32_t e_version;
-    uint64_t e_entry;
-    uint64_t e_phoff;
-    uint64_t e_shoff;
+    uint32_t e_entry;
+    uint32_t e_phoff;
+    uint32_t e_shoff;
     uint32_t e_flags;
     uint16_t e_ehsize;
     uint16_t e_phentsize;
@@ -38,28 +38,28 @@ struct __attribute__((packed)) elf_header {
     uint16_t e_shstrndx;
 };
 
-struct ph_entry {
+struct __attribute__((packed)) ph_entry {
     uint32_t p_type;
+    uint32_t p_offset;
+    uint32_t p_vaddr;
+    uint32_t p_paddr;
+    uint32_t p_filesz;
+    uint32_t p_memsz;
     uint32_t p_flags;
-    uint64_t p_offset;
-    uint64_t p_vaddr;
-    uint64_t p_paddr;
-    uint64_t p_filesz;
-    uint64_t p_memsz;
-    uint64_t p_align;
+    uint32_t p_align;
 };
 
-struct sh_entry {
+struct __attribute__((packed)) sh_entry {
     uint32_t sh_name;
     uint32_t sh_type;
-    uint64_t sh_flags;
-    uint64_t sh_addr;
-    uint64_t sh_offset;
-    uint64_t sh_size;
+    uint32_t sh_flags;
+    uint32_t sh_addr;
+    uint32_t sh_offset;
+    uint32_t sh_size;
     uint32_t sh_link;
     uint32_t sh_info;
-    uint64_t sh_addralign;
-    uint64_t sh_entsize;
+    uint32_t sh_addralign;
+    uint32_t sh_entsize;
 };
 
 void print_header(struct elf_header* hdr)
@@ -88,15 +88,15 @@ void print_header(struct elf_header* hdr)
         hdr->e_machine,
         hdr->e_machine == ELF_HEADER_MACHINE_RISCV ? "RISC-V" : "unsupported");
 
-    printf("  entry = 0x%lx\n", hdr->e_entry);
+    printf("  entry = 0x%x\n", hdr->e_entry);
 
     printf("\n");
-    printf("  prog header offs = 0x%lx\n", hdr->e_phoff);
+    printf("  prog header offs = 0x%x\n", hdr->e_phoff);
     printf("  ph entry size = %d\n", hdr->e_phentsize);
     printf("  ph num = %d\n", hdr->e_phnum);
 
     printf("\n");
-    printf("  sect header offs = 0x%lx\n", hdr->e_shoff);
+    printf("  sect header offs = 0x%x\n", hdr->e_shoff);
     printf("  sh entry size = %d\n", hdr->e_shentsize);
     printf("  sh num = %d\n", hdr->e_shnum);
     printf("  sh str index = %d\n", hdr->e_shstrndx);
@@ -148,12 +148,12 @@ void print_prog_header(struct ph_entry* entry)
     printf("%c", (entry->p_flags & (1 << 0)) ? 'X' : '-');
     printf(")\n");
 
-    printf("    offset = 0x%lx\n", entry->p_offset);
-    printf("    vaddr  = 0x%lx\n", entry->p_vaddr);
-    printf("    paddr  = 0x%lx\n", entry->p_paddr);
-    printf("    filesz = 0x%lx\n", entry->p_filesz);
-    printf("    memsz  = 0x%lx\n", entry->p_memsz);
-    printf("    align  = 0x%lx\n", entry->p_align);
+    printf("    offset = 0x%x\n", entry->p_offset);
+    printf("    vaddr  = 0x%x\n", entry->p_vaddr);
+    printf("    paddr  = 0x%x\n", entry->p_paddr);
+    printf("    filesz = 0x%x\n", entry->p_filesz);
+    printf("    memsz  = 0x%x\n", entry->p_memsz);
+    printf("    align  = 0x%x\n", entry->p_align);
 }
 
 void print_prog_headers(int fd, struct elf_header* hdr)
@@ -219,7 +219,7 @@ void print_section_header(struct sh_entry *entry, const char* section_names) {
     }
     printf("]\n");
 
-    printf("    flags  = 0x%lx [", entry->sh_flags);
+    printf("    flags  = 0x%x [", entry->sh_flags);
     printf("%s", entry->sh_flags & (1 << 0)  ? "WRITE, " : "");
     printf("%s", entry->sh_flags & (1 << 1)  ? "ALLOC, " : "");
     printf("%s", entry->sh_flags & (1 << 2)  ? "EXECINSTR, " : "");
@@ -237,13 +237,13 @@ void print_section_header(struct sh_entry *entry, const char* section_names) {
         printf("]\n");
     }
 
-    printf("    addr   = 0x%0lx\n", entry->sh_addr);
-    printf("    offset = 0x%0lx\n", entry->sh_offset);
-    printf("    size   = 0x%0lx\n", entry->sh_size);
+    printf("    addr   = 0x%x\n", entry->sh_addr);
+    printf("    offset = 0x%x\n", entry->sh_offset);
+    printf("    size   = 0x%x\n", entry->sh_size);
     printf("    link   = 0x%0x\n", entry->sh_link);
     printf("    info   = 0x%0x\n", entry->sh_info);
-    printf("    aalign = 0x%0lx\n", entry->sh_addralign);
-    printf("    ent sz = 0x%0lx\n", entry->sh_entsize);
+    printf("    aalign = 0x%x\n", entry->sh_addralign);
+    printf("    ent sz = 0x%x\n", entry->sh_entsize);
 }
 
 void print_section_headers(int fd, struct elf_header* hdr)

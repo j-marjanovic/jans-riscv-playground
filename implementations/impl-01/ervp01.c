@@ -12,43 +12,32 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "array_mem.h"
 #include "cpu.h"
+#include "elf_loader.h"
+#include "mem.h"
 
 int main() {
-  int fd = open("../../software/hello_world", O_RDWR);
-  if (fd < 0) {
-    perror("open()");
-    return EXIT_FAILURE;
-  }
 
-  const int TEXT_SECTION_OFFSET = 0x8c; // TODO: implement a proper ELF loader
+  uint32_t entry_point;
+  struct mem_section *first_section =
+      load_elf("../../software/hello_world", &entry_point);
 
-  off_t end = lseek(fd, 0, SEEK_END);
-  lseek(fd, TEXT_SECTION_OFFSET, SEEK_SET);
-  size_t instrs_size = end - TEXT_SECTION_OFFSET;
-
-  uint8_t *instrs = malloc(instrs_size);
-  assert(instrs);
-
-  int bytes_read = read(fd, instrs, instrs_size);
-  printf("bytes read = %d\n", bytes_read);
-
-  t_array_mem mem_impl;
-  array_mem_init(&mem_impl, instrs, instrs_size);
+  t_mem mem_impl;
+  mem_init(&mem_impl, first_section);
 
   t_cpu cpu;
   t_mem_ops mem_ops = {
-      .read32 = array_mem_read32,
-      .read16 = array_mem_read16,
-      .read8 = array_mem_read8,
-      .write32 = array_mem_write32,
-      .write16 = array_mem_write16,
-      .write8 = array_mem_write8,
-      .print_diag = array_mem_print_diag,
+      .read32 = mem_read32,
+      .read16 = mem_read16,
+      .read8 = mem_read8,
+      .write32 = mem_write32,
+      .write16 = mem_write16,
+      .write8 = mem_write8,
+      .print_diag = mem_print_diag,
   };
 
   create_cpu(&cpu, (void *)&mem_impl, &mem_ops);
+  cpu.regs.pc = entry_point;
 
   const int NR_INSTR_TO_EXEC = 200;
   for (int i = 0; i < NR_INSTR_TO_EXEC; i++) {

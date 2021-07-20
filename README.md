@@ -4,6 +4,11 @@ Welcome to my playground for the RISC-V!
 
 ## Notes
 
+### 2021-07-19
+
+[CppCon 2018: Matt Godbolt “The Bits Between the Bits: How We Get to main()”](https://www.youtube.com/watch?v=dOfucXtyEsU)
+
+
 ### 2021-07-18
 
 #### ELF file
