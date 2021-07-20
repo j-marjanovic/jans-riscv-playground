@@ -24,6 +24,15 @@ int32_t sign_extend_12bit(uint32_t imm) {
   return imm | mask;
 }
 
+int32_t sign_extend_13bit(uint32_t imm) {
+  const uint32_t mask_const = ((1 << 19) - 1) << 13;
+  uint32_t bit = (imm >> 12) & 1;
+
+  uint32_t mask = mask_const * bit;
+
+  return imm | mask;
+}
+
 int32_t sign_extend_16bit(uint32_t data) {
   const uint32_t mask_const = ((1 << 16) - 1) << 16;
   uint32_t bit = (data >> 15) & 1;
@@ -71,7 +80,7 @@ void op_jal(t_cpu *cpu, uint32_t instr_raw) {
   uint32_t imm = instr_jtype_imm(&instr);
   printf("[op]        JAL, rd = %d, imm = 0x%x\n", instr.rd, imm);
 
-  cpu->regs.x[1] = cpu->regs.pc + 4;
+  cpu->regs.x[instr.rd] = cpu->regs.pc + 4;
   cpu->regs.pc += sign_extend_21bit(imm);
 }
 
@@ -92,17 +101,18 @@ void op_branch(t_cpu *cpu, uint32_t instr_raw) {
   memcpy(&instr, &instr_raw, 4);
 
   uint32_t imm = instr_btype_imm(&instr);
+  int32_t imm_ext = sign_extend_13bit(imm);
 
   printf("[op]        group BRANCH - %s, funct3 = %d, rs1 = %d, rs2 = %d, imm "
-         "= 0x%x\n",
+         "= 0x%x (%d)\n",
          branch_instr_to_str(instr.funct3), instr.funct3, instr.rs1, instr.rs2,
-         imm);
+         imm, imm_ext);
 
   switch (instr.funct3) {
   case BNE:
     if (cpu->regs.x[instr.rs1] != cpu->regs.x[instr.rs2]) {
       printf("[branch]    branch taken\n");
-      cpu->regs.pc += imm;
+      cpu->regs.pc += imm_ext;
     } else {
       printf("[branch]    branch skipped\n");
       cpu->regs.pc += 4;
@@ -111,7 +121,7 @@ void op_branch(t_cpu *cpu, uint32_t instr_raw) {
   case BGE:
     if ((int32_t)cpu->regs.x[instr.rs1] >= (int32_t)cpu->regs.x[instr.rs2]) {
       printf("[branch]    branch taken\n");
-      cpu->regs.pc += imm;
+      cpu->regs.pc += imm_ext;
     } else {
       printf("[branch]    branch skipped\n");
       cpu->regs.pc += 4;
@@ -120,7 +130,7 @@ void op_branch(t_cpu *cpu, uint32_t instr_raw) {
   case BGEU:
     if (cpu->regs.x[instr.rs1] >= cpu->regs.x[instr.rs2]) {
       printf("[branch]    branch taken\n");
-      cpu->regs.pc += imm;
+      cpu->regs.pc += imm_ext;
     } else {
       printf("[branch]    branch skipped\n");
       cpu->regs.pc += 4;
@@ -129,7 +139,7 @@ void op_branch(t_cpu *cpu, uint32_t instr_raw) {
   case BEQ:
     if (cpu->regs.x[instr.rs1] == cpu->regs.x[instr.rs2]) {
       printf("[branch]    branch taken\n");
-      cpu->regs.pc += imm;
+      cpu->regs.pc += imm_ext;
     } else {
       printf("[branch]    branch skipped\n");
       cpu->regs.pc += 4;
@@ -138,16 +148,16 @@ void op_branch(t_cpu *cpu, uint32_t instr_raw) {
   case BLT:
     if ((int32_t)cpu->regs.x[instr.rs1] < (int32_t)cpu->regs.x[instr.rs2]) {
       printf("[branch]    branch taken\n");
-      cpu->regs.pc += imm;
+      cpu->regs.pc += imm_ext;
     } else {
       printf("[branch]    branch skipped\n");
       cpu->regs.pc += 4;
     }
     break;
   case BLTU:
-    if (cpu->regs.x[instr.rs1] >= cpu->regs.x[instr.rs2]) {
+    if (cpu->regs.x[instr.rs1] < cpu->regs.x[instr.rs2]) {
       printf("[branch]    branch taken\n");
-      cpu->regs.pc += imm;
+      cpu->regs.pc += imm_ext;
     } else {
       printf("[branch]    branch skipped\n");
       cpu->regs.pc += 4;
@@ -270,15 +280,13 @@ void op_alu_imm(t_cpu *cpu, uint32_t instr_raw) {
     shamt = instr.imm & 0x3F;
     funct6 = instr.imm >> 6;
 
-    if (funct6 == 0b0100000) { // SRAI
+    if (funct6 == 0b010000) { // SRAI
       uint32_t sign_bit = (cpu->regs.x[instr.rs1] & 0x80000000) >> 31;
-      uint32_t mask = ((1 << (32 - shamt)) - 1) << (32 - shamt);
-      printf("shamt = %x, funct6 = %x\n", shamt, funct6);
-      printf("sign_bit = %d, mask = %x\n", sign_bit, mask);
-      printf("TODO - check this instruction\n");
-      abort();
-      cpu->regs.x[instr.rd] = cpu->regs.x[instr.rs1] >> shamt;
-    } else if (funct6 == 0b0000000) { // SRLI
+      uint32_t mask_const = ((1 << (32 - shamt)) - 1) << (32 - shamt);
+      uint32_t mask = mask_const * sign_bit;
+      // TODO: check carefully if this works correctly
+      cpu->regs.x[instr.rd] = (cpu->regs.x[instr.rs1] >> shamt) | mask;
+    } else if (funct6 == 0b000000) { // SRLI
       cpu->regs.x[instr.rd] = cpu->regs.x[instr.rs1] >> shamt;
     } else {
       printf("ERROR: unrecognized SRxI instruction");
@@ -321,10 +329,32 @@ void op_alu(t_cpu *cpu, uint32_t instr_raw) {
                             << (cpu->regs.x[instr.rs2] & 0x1F);
     break;
   case SLT:
+    cpu->regs.x[instr.rd] =
+        (int32_t)cpu->regs.x[instr.rs1] < (int32_t)cpu->regs.x[instr.rs2];
+    break;
   case SLTU:
+    cpu->regs.x[instr.rd] = cpu->regs.x[instr.rs1] < cpu->regs.x[instr.rs2];
+    break;
   case SRL_SRA:
-    printf("ALU instr not yet implemented\n"); // TODO: implement
-    abort(); // unsupported instr // TODO: move to default
+    if (instr.funct7 == 0b0000000) { // SRL
+      cpu->regs.x[instr.rd] =
+          cpu->regs.x[instr.rs1] >> (cpu->regs.x[instr.rs2] & 0x1F);
+    } else if (instr.funct7 == 0b0100000) { // SRA
+      uint32_t shamt = cpu->regs.x[instr.rs2] & 0x1F;
+      uint32_t sign_bit = (cpu->regs.x[instr.rs1] & 0x80000000) >> 31;
+      uint32_t mask_const = ((1 << (32 - shamt)) - 1) << (32 - shamt);
+      uint32_t mask = mask_const * sign_bit;
+      // TODO: check/verify if this works correctly
+      cpu->regs.x[instr.rd] =
+          (cpu->regs.x[instr.rs1] >> (cpu->regs.x[instr.rs2] & 0x1F)) | mask;
+    } else {
+      printf("unrecognized SRL_SRA instruction\n");
+      abort();
+    }
+    break;
+  default:
+    printf("unrecognized ALU instruction\n");
+    abort();
   }
 
   cpu->regs.pc += 4;

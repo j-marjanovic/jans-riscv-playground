@@ -21,9 +21,11 @@ void create_cpu(t_cpu *cpu, void *mem_impl, t_mem_ops *mem_ops) {
 
   cpu->mem_ops = mem_ops;
   cpu->mem_impl = mem_impl;
+  cpu->_cyc = 0;
 }
 
 void cpu_exec_instr(t_cpu *cpu) {
+  printf("====   CPU cycle %4d   ====\n", cpu->_cyc);
   uint32_t instr = cpu->mem_ops->read32(cpu->mem_impl, cpu->regs.pc, 1);
   printf("[decoder]   loaded instr = 0x%08x\n", instr);
 
@@ -38,4 +40,5 @@ void cpu_exec_instr(t_cpu *cpu) {
   for (unsigned int i = 0; i < 32; i++) {
     cpu->_regs_prev.x[i] = cpu->regs.x[i];
   }
+  cpu->_cyc++;
 }

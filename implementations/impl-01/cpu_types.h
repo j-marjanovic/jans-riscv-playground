@@ -25,6 +25,7 @@ typedef struct {
   void *mem_impl;
   // diagnostics only
   t_regs _regs_prev;
+  uint32_t _cyc;
 } t_cpu;
 
 typedef void (*t_cpu_op)(t_cpu *cpu, uint32_t instr);

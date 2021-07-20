@@ -43,7 +43,7 @@ int main() {
   cpu.regs.pc = entry_point;
   cpu.regs.x[2] = 0x407ffff0; // TODO: figure out where to get this?
 
-  const int NR_INSTR_TO_EXEC = 200;
+  const int NR_INSTR_TO_EXEC = 1000;
   for (int i = 0; i < NR_INSTR_TO_EXEC; i++) {
     cpu_exec_instr(&cpu);
   }
