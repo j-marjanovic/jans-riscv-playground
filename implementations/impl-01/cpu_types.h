@@ -19,6 +19,8 @@ typedef struct {
   void (*print_diag)(void *);
 } t_mem_ops;
 
+typedef char *(*t_symtab_get_name)(void *, uint32_t, uint32_t *);
+
 typedef struct {
   t_regs regs;
   t_mem_ops *mem_ops;
@@ -26,6 +28,8 @@ typedef struct {
   // diagnostics only
   t_regs _regs_prev;
   uint32_t _cyc;
+  void *_symtab_inst;
+  t_symtab_get_name _symtab_get_name;
 } t_cpu;
 
 typedef void (*t_cpu_op)(t_cpu *cpu, uint32_t instr);

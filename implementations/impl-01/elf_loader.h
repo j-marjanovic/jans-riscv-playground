@@ -4,12 +4,8 @@
 
 #pragma once
 
+#include "elf_types.h"
 #include "mem_types.h"
-
-const uint32_t ELF_HEADER_MAG = 0x464c457F;
-const uint8_t ELF_HEADER_MACHINE_RISCV = 0xf3;
-
-#define PT_LOAD (1)
 
 struct mem_section *load_elf(const char *filename, uint32_t *entry) {
 

@@ -15,7 +15,7 @@ const char REG_ABI_NAME[32][4] = {
     "s6 ", "s7 ", "s8 ", "s9 ", "s10", "s11", "t3 ", "t4 ", "t5 ", "t6 ",
 };
 
-void cpu_dump_regs(t_cpu *cpu) {
+void cpu_dump_regs(t_cpu *cpu, char *func_name, uint32_t func_name_offs) {
   printf("----------------------------------------------\n");
   for (int i = 0; i < 32; i++) {
     if ((i != 0) && (i % 8 == 0)) {
@@ -43,6 +43,7 @@ void cpu_dump_regs(t_cpu *cpu) {
   }
 
   printf("\n");
-  printf(" pc = " KCYN "%08x\n" KNRM, cpu->regs.pc);
+  printf(" pc = " KCYN "%08x (%s+0x%x)\n" KNRM, cpu->regs.pc, func_name,
+         func_name_offs);
   printf("----------------------------------------------\n");
 }

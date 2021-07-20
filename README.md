@@ -59,6 +59,10 @@ Important commands:
 * `layout regs`
 * `stepi`
 
+#### Symbol table in ELF
+
+https://stackoverflow.com/questions/48181509/how-to-interpret-the-st-info-field-of-elf-symbol-table-section
+
 ### 2021-07-19
 
 [CppCon 2018: Matt Godbolt “The Bits Between the Bits: How We Get to main()”](https://www.youtube.com/watch?v=dOfucXtyEsU)

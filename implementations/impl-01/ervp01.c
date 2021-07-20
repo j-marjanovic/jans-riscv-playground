@@ -14,6 +14,7 @@
 
 #include "cpu.h"
 #include "elf_loader.h"
+#include "elf_symtab.h"
 #include "mem.h"
 
 int main() {
@@ -21,6 +22,7 @@ int main() {
   uint32_t entry_point;
   struct mem_section *first_section =
       load_elf("../../software/hello_world", &entry_point);
+  assert(first_section);
 
   // add a section for the stack
   append_section(first_section, 0x40800000 - 1024, 1024, 0x6);
@@ -39,9 +41,14 @@ int main() {
       .print_diag = mem_print_diag,
   };
 
-  create_cpu(&cpu, (void *)&mem_impl, &mem_ops);
+  struct symtab_entry *first_symtab =
+      load_elf_symtab("../../software/hello_world");
+  assert(first_symtab);
+
+  cpu_create(&cpu, (void *)&mem_impl, &mem_ops);
   cpu.regs.pc = entry_point;
   cpu.regs.x[2] = 0x407ffff0; // TODO: figure out where to get this?
+  cpu_register_symtab(&cpu, (void *)first_symtab, symtab_get_name);
 
   const int NR_INSTR_TO_EXEC = 1000;
   for (int i = 0; i < NR_INSTR_TO_EXEC; i++) {
