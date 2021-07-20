@@ -53,16 +53,17 @@ uint32_t sign_extend_12bit_unsigned(uint32_t imm) {
   return (uint32_t)sign_extend_12bit(imm);
 }
 
-void op_lui(t_cpu *cpu, uint32_t instr_raw) {
+int op_lui(t_cpu *cpu, uint32_t instr_raw) {
   instr_Utype instr;
   memcpy(&instr, &instr_raw, 4);
   printf("[op]        LUI, rd = %d, imm = 0x%x\n", instr.rd, instr.imm);
 
   cpu->regs.x[instr.rd] = instr.imm << 12;
   cpu->regs.pc += 4;
+  return 0;
 }
 
-void op_auipc(t_cpu *cpu, uint32_t instr_raw) {
+int op_auipc(t_cpu *cpu, uint32_t instr_raw) {
   instr_Utype instr;
   memcpy(&instr, &instr_raw, 4);
   printf("[op]        AUIPC, rd = %d, imm = 0x%x\n", instr.rd, instr.imm);
@@ -71,9 +72,10 @@ void op_auipc(t_cpu *cpu, uint32_t instr_raw) {
 
   cpu->regs.x[instr.rd] = cpu->regs.pc + (instr.imm << 12);
   cpu->regs.pc += 4;
+  return 0;
 }
 
-void op_jal(t_cpu *cpu, uint32_t instr_raw) {
+int op_jal(t_cpu *cpu, uint32_t instr_raw) {
   instr_Jtype instr;
   memcpy(&instr, &instr_raw, 4);
 
@@ -82,9 +84,10 @@ void op_jal(t_cpu *cpu, uint32_t instr_raw) {
 
   cpu->regs.x[instr.rd] = cpu->regs.pc + 4;
   cpu->regs.pc += sign_extend_21bit(imm);
+  return 0;
 }
 
-void op_jalr(t_cpu *cpu, uint32_t instr_raw) {
+int op_jalr(t_cpu *cpu, uint32_t instr_raw) {
   instr_Itype instr;
   memcpy(&instr, &instr_raw, 4);
 
@@ -94,14 +97,37 @@ void op_jalr(t_cpu *cpu, uint32_t instr_raw) {
 
   cpu->regs.x[instr.rd] = cpu->regs.pc + 4;
   cpu->regs.pc = cpu->regs.x[instr.rs1] + sign_extend_12bit(instr.imm);
+  return 0;
 }
 
-void op_system(t_cpu *cpu, uint32_t instr_raw) {
-  printf("TODO - not sure what to do here\n");
+int op_system(t_cpu *cpu, uint32_t instr_raw) {
+  instr_Stype instr;
+  memcpy(&instr, &instr_raw, 4);
+
+  uint32_t a7 = cpu->regs.x[17];
+  printf("[op]        SYSTEM, rs2 = %d, a7 = %d\n", instr.rs2, a7);
+
+  switch (instr.rs2) {
+  case 0: // ECALL
+    switch (a7) {
+    case 93:
+      printf("[ecall]     exit called\n");
+      return 1;
+    default:
+      printf("[ecall]     unimplemented system call (%d)\n", a7);
+      abort();
+    }
+    break;
+  case 1: // EBREAK
+    printf("EBREAK is not yet implemented\n");
+    abort();
+  }
+
   cpu->regs.pc += 4;
+  return 0;
 }
 
-void op_branch(t_cpu *cpu, uint32_t instr_raw) {
+int op_branch(t_cpu *cpu, uint32_t instr_raw) {
   instr_Btype instr;
   memcpy(&instr, &instr_raw, 4);
 
@@ -172,9 +198,11 @@ void op_branch(t_cpu *cpu, uint32_t instr_raw) {
     // TODO: implement
     abort();
   }
+
+  return 0;
 }
 
-void op_load(t_cpu *cpu, uint32_t instr_raw) {
+int op_load(t_cpu *cpu, uint32_t instr_raw) {
   instr_Itype instr;
   memcpy(&instr, &instr_raw, 4);
 
@@ -209,9 +237,10 @@ void op_load(t_cpu *cpu, uint32_t instr_raw) {
 
   cpu->regs.x[instr.rd] = data;
   cpu->regs.pc += 4;
+  return 0;
 }
 
-void op_store(t_cpu *cpu, uint32_t instr_raw) {
+int op_store(t_cpu *cpu, uint32_t instr_raw) {
   instr_Stype instr;
   memcpy(&instr, &instr_raw, 4);
 
@@ -238,10 +267,12 @@ void op_store(t_cpu *cpu, uint32_t instr_raw) {
     printf("ERROR: unrecognized STORE instruction");
     abort();
   }
+
   cpu->regs.pc += 4;
+  return 0;
 }
 
-void op_alu_imm(t_cpu *cpu, uint32_t instr_raw) {
+int op_alu_imm(t_cpu *cpu, uint32_t instr_raw) {
   instr_Itype instr;
   memcpy(&instr, &instr_raw, 4);
 
@@ -300,9 +331,10 @@ void op_alu_imm(t_cpu *cpu, uint32_t instr_raw) {
   }
 
   cpu->regs.pc += 4;
+  return 0;
 }
 
-void op_alu(t_cpu *cpu, uint32_t instr_raw) {
+int op_alu(t_cpu *cpu, uint32_t instr_raw) {
   instr_Rtype instr;
   memcpy(&instr, &instr_raw, 4);
 
@@ -363,6 +395,7 @@ void op_alu(t_cpu *cpu, uint32_t instr_raw) {
   }
 
   cpu->regs.pc += 4;
+  return 0;
 }
 
 t_cpu_op cpu_ops[] = {

@@ -33,13 +33,13 @@ void cpu_register_symtab(t_cpu *cpu, void *symtab_inst,
   cpu->_symtab_get_name = symtab_get_name;
 }
 
-void cpu_exec_instr(t_cpu *cpu) {
+int cpu_exec_instr(t_cpu *cpu) {
   printf("====   CPU cycle %4d   ====\n", cpu->_cyc);
   uint32_t instr = cpu->mem_ops->read32(cpu->mem_impl, cpu->regs.pc, 1);
   printf("[decoder]   loaded instr = 0x%08x\n", instr);
 
   uint8_t opcode = instr & 0x7F;
-  cpu_ops[opcode](cpu, instr);
+  int op_rc = cpu_ops[opcode](cpu, instr);
   cpu->regs.x[0] = 0;
 
   uint32_t func_name_offs;
@@ -54,4 +54,6 @@ void cpu_exec_instr(t_cpu *cpu) {
     cpu->_regs_prev.x[i] = cpu->regs.x[i];
   }
   cpu->_cyc++;
+
+  return op_rc;
 }

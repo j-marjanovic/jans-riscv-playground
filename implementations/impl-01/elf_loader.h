@@ -80,8 +80,8 @@ struct mem_section *load_elf(const char *filename, uint32_t *entry) {
   return first_section;
 }
 
-void append_section(struct mem_section *first_section, uint32_t addr,
-                    uint32_t size, uint32_t flags) {
+void *append_section(struct mem_section *first_section, uint32_t addr,
+                     uint32_t size, uint32_t flags) {
   // find last section
   struct mem_section *last_section = first_section;
   while (last_section->next) {
@@ -105,4 +105,6 @@ void append_section(struct mem_section *first_section, uint32_t addr,
 
   new_section->mem = malloc(size);
   assert(new_section->mem);
+
+  return new_section->mem;
 }

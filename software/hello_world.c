@@ -6,9 +6,10 @@ int main() {
   int b = 2;
   int c = a + b;
 
-  float x = 1.234;
-  float y = 2.345;
-  float z = x + y;
+  int x = 6;
+  int y = 7;
+  int z = x * y;
 
-  printf("c = %d, z = %f\n", c, z);
+  char *out_buffer = (char *)0xa0000000;
+  sprintf(out_buffer, "%d + %d = %d, %d * %d = %d\n", a, b, c, x, y, z);
 }

@@ -31,6 +31,64 @@ Welcome to my playground for the RISC-V!
 
 https://github.com/riscvarchive/riscv-linux/blob/32b1573d1f118844d859341d095e005ca5ba572e/arch/riscv/include/asm/sbi.h#L30
 
+https://groups.google.com/a/groups.riscv.org/g/sw-dev/c/exbrzM3GZDQ
+
+**list of sys calls*:
+
+https://github.com/riscv/riscv-pk/blob/66d7fcb56d6a4cd4879922f184bb2274918ac3cd/pk/syscall.h
+
+##### fstat
+
+```
+====   CPU cycle  471   ====
+[mem]       read32 from 0x1fb24
+[mem]       ... read32 from 0x1fb24 = 0x10593
+[decoder]   loaded instr = 0x00010593
+[op]        group ALU IMM - ADDI, rd = 11, funct3 = 0, rs1 = 2, imm = 0x0 (0)
+----------------------------------------------
+  0 |  0   00000000  ra  0001cfa8  sp  407ffc70  gp  000268c0  tp  00000000  t0  000102ac  t1  0000000f  t2  00000000
+  8 |  s0  000260c0  s1  407ffd18  a0  00000001  a1  407ffc70  a2  407ffd18  a3  00000000  a4  00000001  a5  00002009
+ 16 |  a6  00000000  a7  00000050  s2  00024c00  s3  00000000  s4  00000000  s5  00000000  s6  00000000  s7  00000000
+ 24 |  s8  00026414  s9  00000000  s10 000260c0  s11 00000000  t3  00000000  t4  00000000  t5  00000000  t6  00000000
+ pc = 0001fb28 (_fstat+0x1c)
+----------------------------------------------
+Last 8 memory operations (last first):
+   0: write word to 0x407ffcf8 = 0x260c0
+   1: write word to 0x407ffcfc = 0x1cfa8
+   2: write word to 0x407ffcf4 = 0x260c0
+   3: write word to 0x26a9c = 0x0
+   4: write word to 0x407ffd0c = 0x16948
+   5: write word to 0x407ffd04 = 0x260c0
+   6: write word to 0x407ffd08 = 0x26414
+   7: read halfword from 0x26422 = 0x1
+====   CPU cycle  472   ====
+[mem]       read32 from 0x1fb28
+[mem]       ... read32 from 0x1fb28 = 0x73
+[decoder]   loaded instr = 0x00000073
+[op]        SYSTEM, rs2 = 0, a7 = 80
+[ecall]     unimplemented system call (80)
+```
+
+https://github.com/riscv/riscv-newlib/blob/f289cef6be67da67b2d97a47d6576fa7e6b4c858/libgloss/riscv/sys_fstat.c
+
+```c
+  struct kernel_stat kst;
+  int rv = syscall_errno (SYS_fstat, file, &kst, 0, 0, 0, 0);
+```
+
+```c
+static inline long
+syscall_errno(long n, long _a0, long _a1, long _a2, long _a3, long _a4, long _a5)
+{
+  long a0 = __internal_syscall (n, _a0, _a1, _a2, _a3, _a4, _a5);
+```
+
+#### Execution environment
+
+https://github.com/riscv/riscv-isa-manual/releases/download/Ratified-IMFDQC-and-Priv-v1.11/riscv-privileged-20190608.pdf
+
+https://matrix89.github.io/writes/writes/experiments-in-riscv/
+
 #### GDB + QEMU
 
 https://qemu-project.gitlab.io/qemu/system/gdb.html

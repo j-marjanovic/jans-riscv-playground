@@ -25,7 +25,9 @@ int main() {
   assert(first_section);
 
   // add a section for the stack
-  append_section(first_section, 0x40800000 - 1024, 1024, 0x6);
+  append_section(first_section, 0x40800000 - 0x1000, 0x1000, 0x6);
+  // add a section for I/O
+  void *io_section = append_section(first_section, 0xa0000000, 1024, 0x6);
 
   t_mem mem_impl;
   mem_init(&mem_impl, first_section);
@@ -67,10 +69,27 @@ int main() {
   0x407ffffc:     0x408001c0
   */
 
-  const int NR_INSTR_TO_EXEC = 587;
-  for (int i = 0; i < NR_INSTR_TO_EXEC; i++) {
-    cpu_exec_instr(&cpu);
+  const int NR_INSTR_TO_EXEC = 100000;
+  int i;
+  for (i = 0; i < NR_INSTR_TO_EXEC; i++) {
+    int rc = cpu_exec_instr(&cpu);
+    if (rc == 1) {
+      printf("\nexit called, stopping execution...\n");
+      break;
+    }
   }
 
+  printf("\n");
+
+  if (i == NR_INSTR_TO_EXEC) {
+    printf(
+        "exec did not reached exit syscall, try incrementing the # of instr\n");
+    return 0;
+  }
+
+  printf("Output buffer:\n");
+  printf("--- start output buffer ---\n");
+  printf("%s", (char *)io_section);
+  printf("---  end output buffer  ---\n");
   return 0;
 }

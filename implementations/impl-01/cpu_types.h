@@ -32,4 +32,4 @@ typedef struct {
   t_symtab_get_name _symtab_get_name;
 } t_cpu;
 
-typedef void (*t_cpu_op)(t_cpu *cpu, uint32_t instr);
+typedef int (*t_cpu_op)(t_cpu *cpu, uint32_t instr);
