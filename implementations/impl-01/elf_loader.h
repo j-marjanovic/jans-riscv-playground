@@ -40,6 +40,13 @@ struct mem_section *load_elf(const char *filename, uint32_t *entry) {
 
     printf("[elf loader] header %d\n", i);
     printf("[elf loader]   type   = %d\n", cur_section->ph.p_type);
+
+    printf("[elf loader]   flags  = %x (", cur_section->ph.p_flags);
+    printf("%c", (cur_section->ph.p_flags & (1 << 2)) ? 'R' : '-');
+    printf("%c", (cur_section->ph.p_flags & (1 << 1)) ? 'W' : '-');
+    printf("%c", (cur_section->ph.p_flags & (1 << 0)) ? 'X' : '-');
+    printf(")\n");
+
     printf("[elf loader]   offset = 0x%x\n", cur_section->ph.p_offset);
     printf("[elf loader]   vaddr  = 0x%x\n", cur_section->ph.p_vaddr);
     printf("[elf loader]   paddr  = 0x%x\n", cur_section->ph.p_paddr);

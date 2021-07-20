@@ -4,6 +4,61 @@ Welcome to my playground for the RISC-V!
 
 ## Notes
 
+### 2021-07-20
+
+#### GDB + QEMU
+
+https://qemu-project.gitlab.io/qemu/system/gdb.html
+
+##### QEMU
+
+```console
+$ qemu-riscv32 -g 1234   ./software/hello_world
+```
+
+##### GDB
+
+```console
+$ riscv32-unknown-elf-gdb ./software/hello_world
+GNU gdb (GDB) 10.1
+Copyright (C) 2020 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "--host=x86_64-pc-linux-gnu --target=riscv32-unknown-elf".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<https://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from ./software/hello_world...
+(gdb) target remote localhost:1234
+Remote debugging using localhost:1234
+0x0001008c in _start ()
+(gdb) info registers
+ra             0x0	0x0
+sp             0x407ffff0	0x407ffff0
+gp             0x0	0x0
+tp             0x0	0x0
+t0             0x0	0
+t1             0x0	0
+t2             0x0	0
+fp             0x0	0x0
+s1             0x0	0
+<...>
+```
+
+Important commands:
+
+* `target remote localhost:1234`
+* `layout asm`
+* `layout regs`
+* `stepi`
+
 ### 2021-07-19
 
 [CppCon 2018: Matt Godbolt “The Bits Between the Bits: How We Get to main()”](https://www.youtube.com/watch?v=dOfucXtyEsU)

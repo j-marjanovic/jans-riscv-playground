@@ -60,7 +60,7 @@ void op_auipc(t_cpu *cpu, uint32_t instr_raw) {
 
   assert(instr.rd != 0);
 
-  cpu->regs.x[instr.rd] += instr.imm << 12;
+  cpu->regs.x[instr.rd] = cpu->regs.pc + (instr.imm << 12);
   cpu->regs.pc += 4;
 }
 
@@ -79,11 +79,12 @@ void op_jalr(t_cpu *cpu, uint32_t instr_raw) {
   instr_Itype instr;
   memcpy(&instr, &instr_raw, 4);
 
-  printf("[op]        JALR, rd = %d, funct3 = %d, rs1 = %d, imm = 0x%x\n",
-         instr.rd, instr.funct3, instr.rs1, instr.imm);
+  printf("[op]        JALR, rd = %d, funct3 = %d, rs1 = %d, imm = 0x%x (%d)\n",
+         instr.rd, instr.funct3, instr.rs1, instr.imm,
+         sign_extend_12bit(instr.imm));
 
   cpu->regs.x[instr.rd] = cpu->regs.pc + 4;
-  cpu->regs.pc += cpu->regs.x[instr.rs1] + sign_extend_12bit(instr.imm);
+  cpu->regs.pc = cpu->regs.x[instr.rs1] + sign_extend_12bit(instr.imm);
 }
 
 void op_branch(t_cpu *cpu, uint32_t instr_raw) {
@@ -127,6 +128,24 @@ void op_branch(t_cpu *cpu, uint32_t instr_raw) {
     break;
   case BEQ:
     if (cpu->regs.x[instr.rs1] == cpu->regs.x[instr.rs2]) {
+      printf("[branch]    branch taken\n");
+      cpu->regs.pc += imm;
+    } else {
+      printf("[branch]    branch skipped\n");
+      cpu->regs.pc += 4;
+    }
+    break;
+  case BLT:
+    if ((int32_t)cpu->regs.x[instr.rs1] < (int32_t)cpu->regs.x[instr.rs2]) {
+      printf("[branch]    branch taken\n");
+      cpu->regs.pc += imm;
+    } else {
+      printf("[branch]    branch skipped\n");
+      cpu->regs.pc += 4;
+    }
+    break;
+  case BLTU:
+    if (cpu->regs.x[instr.rs1] >= cpu->regs.x[instr.rs2]) {
       printf("[branch]    branch taken\n");
       cpu->regs.pc += imm;
     } else {
@@ -186,7 +205,7 @@ void op_store(t_cpu *cpu, uint32_t instr_raw) {
          instr.funct3, instr.rs1, instr.rs2, imm);
 
   uint32_t store_addr = cpu->regs.x[instr.rs1] + sign_extend_12bit(imm);
-  printf("[store]      addr = %08x\n", store_addr);
+  printf("[store]     addr = %08x\n", store_addr);
 
   uint32_t data = cpu->regs.x[instr.rs2];
 
@@ -212,9 +231,9 @@ void op_alu_imm(t_cpu *cpu, uint32_t instr_raw) {
   memcpy(&instr, &instr_raw, 4);
 
   printf("[op]        group ALU IMM - %s, rd = %d, funct3 = %d, rs1 = %d, imm "
-         "= 0x%x\n",
+         "= 0x%x (%d)\n",
          alu_imm_instr_to_str(instr.funct3), instr.rd, instr.funct3, instr.rs1,
-         instr.imm);
+         instr.imm, sign_extend_12bit(instr.imm));
 
   uint32_t shamt;
   uint32_t funct6;
@@ -222,27 +241,27 @@ void op_alu_imm(t_cpu *cpu, uint32_t instr_raw) {
   switch (instr.funct3) {
   case ADDI:
     cpu->regs.x[instr.rd] =
-        cpu->regs.x[instr.rs1] + instr.imm; // TODO: sign extend
+        cpu->regs.x[instr.rs1] + sign_extend_12bit(instr.imm);
     break;
   case SLTI:
     cpu->regs.x[instr.rd] =
-        cpu->regs.x[instr.rs1] > instr.imm; // TODO: sign extend
+        (int32_t)cpu->regs.x[instr.rs1] > sign_extend_12bit(instr.imm);
     break;
   case SLTIU:
     cpu->regs.x[instr.rd] =
-        cpu->regs.x[instr.rs1] > instr.imm; // TODO: sign extend, unsigned
+        cpu->regs.x[instr.rs1] > sign_extend_12bit_unsigned(instr.imm);
     break;
   case XORI:
     cpu->regs.x[instr.rd] =
-        cpu->regs.x[instr.rs1] ^ instr.imm; // TODO: sign extend
+        cpu->regs.x[instr.rs1] ^ sign_extend_12bit(instr.imm);
     break;
   case ORI:
     cpu->regs.x[instr.rd] =
-        cpu->regs.x[instr.rs1] | instr.imm; // TODO: sign extend
+        cpu->regs.x[instr.rs1] | sign_extend_12bit(instr.imm);
     break;
   case ANDI:
     cpu->regs.x[instr.rd] =
-        cpu->regs.x[instr.rs1] & instr.imm; // TODO: sign extend
+        cpu->regs.x[instr.rs1] & sign_extend_12bit(instr.imm);
     break;
   case SLLI:
     cpu->regs.x[instr.rd] = cpu->regs.x[instr.rs1] << instr.imm;
