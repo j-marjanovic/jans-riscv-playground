@@ -22,6 +22,9 @@ int main() {
   struct mem_section *first_section =
       load_elf("../../software/hello_world", &entry_point);
 
+  // add a section for the stack
+  append_section(first_section, 0x40800000 - 1024, 1024, 0x6);
+
   t_mem mem_impl;
   mem_init(&mem_impl, first_section);
 

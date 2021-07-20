@@ -83,3 +83,30 @@ struct mem_section *load_elf(const char *filename, uint32_t *entry) {
 
   return first_section;
 }
+
+void append_section(struct mem_section *first_section, uint32_t addr,
+                    uint32_t size, uint32_t flags) {
+  // find last section
+  struct mem_section *last_section = first_section;
+  while (last_section->next) {
+    last_section = last_section->next;
+  }
+
+  struct mem_section *new_section = malloc(sizeof(struct mem_section));
+  assert(new_section);
+  last_section->next = new_section;
+
+  new_section->ph.p_type = -1;   // not needed by the emulator
+  new_section->ph.p_offset = -1; // not needed by the emulator
+  new_section->ph.p_vaddr = addr;
+  new_section->ph.p_paddr = addr;
+  new_section->ph.p_filesz = size;
+  new_section->ph.p_memsz = size;
+  new_section->ph.p_flags = flags;
+  new_section->ph.p_align = -1; // not needed by the emulator
+
+  new_section->next = NULL;
+
+  new_section->mem = malloc(size);
+  assert(new_section->mem);
+}
