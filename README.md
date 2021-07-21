@@ -2,7 +2,32 @@
 
 Welcome to my playground for the RISC-V!
 
+## Implementations
+
+ERVP stands for Experimental RISC-V Processor
+
+### ERVP-01
+
+* This is my first attempt at writing a RISC-V processor
+* It has no practical value - but a high pedagogical value, at least for me
+* It is an emulator, written in C, meant to run on an x86_64 (or on another
+  RISC-V CPU if "Inception" is your favorite movie - *dramatic music increases*)
+* It implements just the bare minimum to be able to run `software/hello_world`
+* Some instructions are even not implemented, search for `TODO`s
+* For I/O it uses a single buffer at `0xa0000000` which is printed out at the
+  end of the execution
+* The processor has fulfilled its mission by successfully executing a minimal
+  RISC-V program:
+
+![ERVP-01 output](docs/ervp01_output.png)
+
 ## Notes
+
+### 2021-07-21
+
+[MIT 6.004 L02: RISC-V Assembly](https://www.youtube.com/watch?v=41RyDXIoq2w)
+
+[MIT 6.004 L14: Implementing RISC-V Processor in Hardware](https://www.youtube.com/watch?v=c23MThWhXMw)
 
 ### 2021-07-20
 
@@ -33,7 +58,7 @@ https://github.com/riscvarchive/riscv-linux/blob/32b1573d1f118844d859341d095e005
 
 https://groups.google.com/a/groups.riscv.org/g/sw-dev/c/exbrzM3GZDQ
 
-**list of sys calls*:
+**list of sys calls**:
 
 https://github.com/riscv/riscv-pk/blob/66d7fcb56d6a4cd4879922f184bb2274918ac3cd/pk/syscall.h
 
