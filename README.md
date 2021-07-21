@@ -25,9 +25,15 @@ ERVP stands for Experimental RISC-V Processor
 
 ### 2021-07-21
 
+#### MIT 6.004
+
 [MIT 6.004 L02: RISC-V Assembly](https://www.youtube.com/watch?v=41RyDXIoq2w)
 
 [MIT 6.004 L14: Implementing RISC-V Processor in Hardware](https://www.youtube.com/watch?v=c23MThWhXMw)
+
+#### Vivado
+
+https://www.xilinx.com/support/documentation/ip_documentation/zynq_ultra_ps_e_vip/v1_0/ds941-zynq-ultra-ps-e-vip.pdf
 
 ### 2021-07-20
 

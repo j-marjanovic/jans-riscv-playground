@@ -1,14 +1,14 @@
-
-ThisBuild / scalaVersion     := "2.12.13"
-ThisBuild / version          := "0.1.0"
-ThisBuild / organization     := "j-marjanovic.io"
+ThisBuild / scalaVersion := "2.12.13"
+ThisBuild / version := "0.1.0"
+ThisBuild / organization := "j-marjanovic.io"
 
 lazy val root = (project in file("."))
   .settings(
     name := "ervp02",
     libraryDependencies ++= Seq(
       "edu.berkeley.cs" %% "chisel3" % "3.4.3",
-      "edu.berkeley.cs" %% "chiseltest" % "0.3.3" % "test"
+      "edu.berkeley.cs" %% "chiseltest" % "0.3.3" % "test",
+      "io.j-marjanovic" %% "chisel-bfmtester" % "0.4.0"
     ),
     scalacOptions ++= Seq(
       "-Xsource:2.11",
@@ -22,4 +22,3 @@ lazy val root = (project in file("."))
     addCompilerPlugin("edu.berkeley.cs" % "chisel3-plugin" % "3.4.3" cross CrossVersion.full),
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
   )
-

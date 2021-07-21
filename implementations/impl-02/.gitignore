@@ -1,6 +1,6 @@
 ### Project Specific stuff
 test_run_dir/*
-output/*
+
 ### XilinxISE template
 # intermediate build files
 *.bgn
