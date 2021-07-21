@@ -9,10 +9,14 @@ class ERVP02test extends ChiselFlatSpec {
   behavior of "ERVP02"
 
   it should "should check the decoder" in {
-    assertTesterPasses(new DecodeTest())
+    assertTesterPasses(new DecoderTest())
   }
 
   it should "should check the register file" in {
     assertTesterPasses(new RegFileTest())
+  }
+
+  it should "should check the ALU" in {
+    assertTesterPasses(new ALUTest())
   }
 }

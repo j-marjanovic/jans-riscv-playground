@@ -1,0 +1,68 @@
+// Copyright (c) 2021 Jan Marjanovic
+// This code is licensed under a 3-clause BSD license - see LICENSE.txt
+
+package ervp02
+
+import chisel3._
+import chisel3.iotesters.SteppedHWIOTester
+
+class ALUWrapper extends Module {
+
+  val io = IO(new Bundle {
+    val decoder_rtype = Input(UInt(32.W)) //new InstrRtype())
+    val decoder_itype = Input(UInt(32.W)) //new InstrItype())
+
+    val reg_din1 = Input(UInt(32.W))
+    val reg_din2 = Input(UInt(32.W))
+
+    val enable_op_alu = Input(Bool())
+    val enable_op_alu_imm = Input(Bool())
+
+    val dout = Output(UInt(32.W))
+  })
+
+  val mod = Module(new ALU())
+  mod.io.decoder_rtype := io.decoder_rtype.asTypeOf(new InstrRtype)
+  mod.io.decoder_itype := io.decoder_itype.asTypeOf(new InstrItype)
+
+  mod.io.reg_din1 <> io.reg_din1
+  mod.io.reg_din2 <> io.reg_din2
+
+  mod.io.enable_op_alu <> io.enable_op_alu
+  mod.io.enable_op_alu_imm <> io.enable_op_alu_imm
+
+  mod.io.dout <> io.dout
+
+}
+
+class ALUTest extends SteppedHWIOTester {
+  override val device_under_test = Module(new ALUWrapper())
+
+  // 208:	00b50633          	add	a2,a0,a1
+  poke(device_under_test.io.decoder_rtype, 0x00b50633)
+  poke(device_under_test.io.reg_din1, 1)
+  poke(device_under_test.io.reg_din2, 2)
+  poke(device_under_test.io.enable_op_alu, 1)
+  poke(device_under_test.io.enable_op_alu_imm, 0)
+  step(1)
+  expect(device_under_test.io.dout, 3)
+
+  // 20c:	40e687b3          	sub	a5,a3,a4
+  poke(device_under_test.io.decoder_rtype, 0x40e687b3)
+  poke(device_under_test.io.reg_din1, 5)
+  poke(device_under_test.io.reg_din2, 3)
+  poke(device_under_test.io.enable_op_alu, 1)
+  poke(device_under_test.io.enable_op_alu_imm, 0)
+  step(1)
+  expect(device_under_test.io.dout, 2)
+
+  // 210:	00a60613          	addi	a2,a2,10
+  poke(device_under_test.io.decoder_itype, 0x00a60613)
+  poke(device_under_test.io.reg_din1, 11)
+  poke(device_under_test.io.reg_din2, 12)
+  poke(device_under_test.io.enable_op_alu, 0)
+  poke(device_under_test.io.enable_op_alu_imm, 1)
+  step(1)
+  expect(device_under_test.io.dout, 21)
+
+}

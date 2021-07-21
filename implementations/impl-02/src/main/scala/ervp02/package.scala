@@ -14,4 +14,12 @@ package object ervp02 {
     val opcode = UInt(7.W)
   }
 
+  class InstrItype extends Bundle {
+    val imm = UInt(12.W)
+    val rs1 = UInt(5.W)
+    val funct3 = UInt(3.W)
+    val rd = UInt(5.W)
+    val opcode = UInt(7.W)
+  }
+
 }

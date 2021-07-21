@@ -1,10 +1,13 @@
+// Copyright (c) 2021 Jan Marjanovic
+// This code is licensed under a 3-clause BSD license - see LICENSE.txt
+
 package ervp02
 
 import chisel3._
 import chisel3.iotesters.SteppedHWIOTester
 
-class DecodeTest extends SteppedHWIOTester {
-  override val device_under_test = Module(new Decode())
+class DecoderTest extends SteppedHWIOTester {
+  override val device_under_test = Module(new Decoder())
 
   poke(device_under_test.io.instr_raw, 0x00c50533)
   step(1)
