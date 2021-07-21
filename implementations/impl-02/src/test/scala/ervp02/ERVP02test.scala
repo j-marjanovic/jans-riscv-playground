@@ -3,9 +3,16 @@
 
 package ervp02
 
-import org.scalatest._
-import chiseltest._
+import chisel3.iotesters.ChiselFlatSpec
 
-class ERVP02test extends FlatSpec with ChiselScalatestTester with Matchers {
+class ERVP02test extends ChiselFlatSpec {
   behavior of "ERVP02"
+
+  it should "should check the decoder" in {
+    assertTesterPasses(new DecodeTest())
+  }
+
+  it should "should check the register file" in {
+    assertTesterPasses(new RegFileTest())
+  }
 }

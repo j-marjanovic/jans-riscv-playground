@@ -74,14 +74,10 @@ class ERVP02 extends MultiIOModule {
   mod_instr_mem.io.wea := mod_cpu.mem_instr.we
   mod_cpu.mem_instr.din := mod_instr_mem.io.doutb
 
-  /*
-    mod_mem.io.addrb := mod_kernel.io.addr
-    mod_mem.io.dinb := mod_kernel.io.dout
-    mod_mem.io.web := mod_kernel.io.we
-   */
-
+  // UART
   uart.tx := uart.rx
 
+  // LED
   val led_cntr = Reg(UInt(27.W))
   led_cntr := led_cntr + 1.U
   led := led_cntr(4)
