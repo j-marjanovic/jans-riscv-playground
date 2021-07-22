@@ -5,6 +5,18 @@ package ervp02
 
 import chisel3._
 
-class Fetch extends MultiIOModule {
+class Fetch extends Module {
+  val io = IO(new Bundle {
+    val pc = Input(UInt(32.W))
+
+    val mem_instr = new MemoryInterface(32, 10)
+
+    val instr_raw = Output(UInt(32.W))
+  })
+
+  io.mem_instr.addr := io.pc
+  io.mem_instr.we := false.B
+  io.mem_instr.dout := DontCare
+  io.instr_raw := io.mem_instr.din
 
 }

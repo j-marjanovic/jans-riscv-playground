@@ -6,8 +6,6 @@ package ervp02
 import chisel3._
 
 class Decoder extends Module {
-  val XLEN: Int = 32
-
   val io = IO(new Bundle {
     val instr_raw = Input(UInt(32.W))
     val decoder_rtype = Output(new InstrRtype())

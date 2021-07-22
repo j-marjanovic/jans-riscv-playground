@@ -9,8 +9,8 @@ import chisel3.iotesters.SteppedHWIOTester
 class ALUWrapper extends Module {
 
   val io = IO(new Bundle {
-    val decoder_rtype = Input(UInt(32.W)) //new InstrRtype())
-    val decoder_itype = Input(UInt(32.W)) //new InstrItype())
+    val decoder_rtype = Input(UInt(32.W))
+    val decoder_itype = Input(UInt(32.W))
 
     val reg_din1 = Input(UInt(32.W))
     val reg_din2 = Input(UInt(32.W))

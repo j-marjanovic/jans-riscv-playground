@@ -4,6 +4,7 @@
 package ervp02
 
 import chisel3.iotesters.ChiselFlatSpec
+import chisel3.iotesters
 
 class ERVP02test extends ChiselFlatSpec {
   behavior of "ERVP02"
@@ -18,5 +19,24 @@ class ERVP02test extends ChiselFlatSpec {
 
   it should "should check the ALU" in {
     assertTesterPasses(new ALUTest())
+  }
+
+  it should "check the CPU" in {
+    iotesters.Driver.execute(
+      Array(
+        "--backend-name",
+        "verilator",
+        "--fint-write-vcd",
+        "--test-seed",
+        "1234",
+        "--target-dir",
+        "test_run_dir/CpuTest",
+        "--top-name",
+        "CpuTest"
+      ),
+      () => new Cpu
+    ) { c =>
+      new CpuTest(c)
+    }
   }
 }
