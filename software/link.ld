@@ -3,17 +3,26 @@ ENTRY(_start)
 
 SECTIONS
 {
-/* text: test code section */
-. = 0x200;
-.text :
-{
-*(.text)
-}
-/* data: Initialized data segment */
-.data :
-{
-*(.data)
-}
-/* End of uninitalized data segement */
-_end = .;
+  /* text: test code section */
+  . = 0x200;
+  .text :
+  {
+    *(.text)
+  }
+
+  /* data: Initialized data segment */
+  .data :
+  {
+    *(.data)
+  }
+
+  /* End of uninitalized data segement */
+  _end = .;
+
+  . = 0x2000;
+  .data_mem :
+  {
+    . = . + 0x2000;
+  }
+
 }
