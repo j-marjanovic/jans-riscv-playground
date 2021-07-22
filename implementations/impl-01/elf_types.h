@@ -63,6 +63,7 @@ struct __attribute__((packed)) sym_entry {
 
 const uint32_t ELF_HEADER_MAG = 0x464c457F;
 const uint8_t ELF_HEADER_MACHINE_RISCV = 0xf3;
+const uint8_t ELF_HEADER_IDENT_CLASS_32B = 1;
 
 const uint32_t PT_LOAD = 1;
 

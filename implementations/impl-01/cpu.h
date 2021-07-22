@@ -42,9 +42,12 @@ int cpu_exec_instr(t_cpu *cpu) {
   int op_rc = cpu_ops[opcode](cpu, instr);
   cpu->regs.x[0] = 0;
 
-  uint32_t func_name_offs;
-  char *func_name =
-      cpu->_symtab_get_name(cpu->_symtab_inst, cpu->regs.pc, &func_name_offs);
+  uint32_t func_name_offs = cpu->regs.pc;
+  char *func_name = "";
+  if (cpu->_symtab_get_name && cpu->_symtab_inst) {
+    func_name =
+        cpu->_symtab_get_name(cpu->_symtab_inst, cpu->regs.pc, &func_name_offs);
+  }
 
   cpu_dump_regs(cpu, func_name, func_name_offs);
   cpu->mem_ops->print_diag(cpu->mem_impl);

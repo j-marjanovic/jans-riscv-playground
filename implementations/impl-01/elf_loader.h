@@ -21,6 +21,10 @@ struct mem_section *load_elf(const char *filename, uint32_t *entry) {
   read(fd, &hdr, sizeof(hdr));
   *entry = hdr.e_entry;
 
+  assert(hdr.e_ident_mag == ELF_HEADER_MAG);
+  assert(hdr.e_machine == ELF_HEADER_MACHINE_RISCV);
+  assert(hdr.e_ident_class == ELF_HEADER_IDENT_CLASS_32B);
+
   // go to the program header files
   lseek(fd, hdr.e_phoff, SEEK_SET);
 
