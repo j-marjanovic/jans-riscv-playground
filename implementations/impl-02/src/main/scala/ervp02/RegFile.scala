@@ -14,7 +14,7 @@ class RegFile extends Module {
 
     val rd = Input(UInt(5.W))
     val din = Input(UInt(32.W))
-    val we = Input(UInt(32.W))
+    val we = Input(Bool())
   })
 
   val mod_mem1 = Module(new DualPortRam(32, 32))

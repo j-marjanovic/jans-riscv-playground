@@ -10,16 +10,22 @@ class CpuTest(c: Cpu) extends PeekPokeTester(c) {
    200:	00100513          	li	a0,1
    204:	00200593          	li	a1,2
    208:	00b50633          	add	a2,a0,a1
-   20c:	40e687b3          	sub	a5,a3,a4
-   210:	00a60613          	addi	a2,a2,10
+   20c:	00a60613          	addi	a2,a2,10
+   210:	000022b7          	lui	t0,0x2
+   214:	00c2a823          	sw	a2,16(t0) # 2010 <_end+0x1dec>
    */
 
   def wait_for_next_pc(): Unit = {
+    var timeout = 100
     var pc = peek(c.mem_instr.addr)
     val pc_prev = pc
     while (pc == pc_prev) {
       pc = peek(c.mem_instr.addr)
       step(1)
+      if (timeout == 0) {
+        throw new RuntimeException("timeout while waiting for the next PC")
+      }
+      timeout -= 1
     }
   }
 
@@ -36,4 +42,13 @@ class CpuTest(c: Cpu) extends PeekPokeTester(c) {
 
   poke(c.mem_instr.din, 0x00a60613)
   wait_for_next_pc()
+
+  poke(c.mem_instr.din, 0x000022b7)
+  wait_for_next_pc()
+
+  /*
+  poke(c.mem_instr.din, 0x00c2a823)
+  step(10)
+  // wait_for_next_pc()
+  */
 }

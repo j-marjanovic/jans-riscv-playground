@@ -22,7 +22,6 @@ package object ervp02 {
     val opcode = UInt(7.W)
   }
 
-  /*
   class InstrStype extends Bundle {
     val imm11_5 = UInt(7.W)
     val rs2 = UInt(5.W)
@@ -32,6 +31,10 @@ package object ervp02 {
     val opcode = UInt(7.W)
   }
 
-   */
+  class InstrUtype extends Bundle {
+    val imm20 = UInt(20.W)
+    val rd = UInt(5.W)
+    val opcode = UInt(7.W)
+  }
 
 }

@@ -77,10 +77,12 @@ class Cpu extends MultiIOModule {
   // alu
   mod_alu.io.decoder_rtype := mod_decoder.io.decoder_rtype
   mod_alu.io.decoder_itype := mod_decoder.io.decoder_itype
+  mod_alu.io.decoder_utype := mod_decoder.io.decoder_utype
   mod_alu.io.reg_din1 := mod_reg_file.io.dout1
   mod_alu.io.reg_din2 := mod_reg_file.io.dout2
   mod_alu.io.enable_op_alu := mod_decoder.io.enable_op_alu
   mod_alu.io.enable_op_alu_imm := mod_decoder.io.enable_op_alu_imm
+  mod_alu.io.enable_op_lui := mod_decoder.io.enable_op_lui
 
   // store/load
   // mod_store_load.io.decoder_itype := mod_decoder.io.decoder_itype
@@ -92,7 +94,7 @@ class Cpu extends MultiIOModule {
   mod_store_load.io.mem_data <> mem_data
 
   mod_reg_file.io.din := Mux(
-    mod_decoder.io.enable_op_alu || mod_decoder.io.enable_op_alu_imm,
+    mod_decoder.io.enable_op_alu || mod_decoder.io.enable_op_alu_imm || mod_decoder.io.enable_op_lui,
     mod_alu.io.dout,
     Mux(mod_decoder.io.enable_op_store, mod_store_load.io.dout, 0.U)
   )
@@ -102,7 +104,8 @@ class Cpu extends MultiIOModule {
     (mod_decoder.io.enable_op_alu ||
       mod_decoder.io.enable_op_alu_imm ||
       mod_decoder.io.enable_op_store ||
-      mod_decoder.io.enable_op_load)
+      mod_decoder.io.enable_op_load ||
+      mod_decoder.io.enable_op_lui)
 
   mod_pc.io.new_pc := 0.U // TODO - connect to branch
   mod_pc.io.load := false.B // TODO - connect to branch
