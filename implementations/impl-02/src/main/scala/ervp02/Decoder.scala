@@ -7,6 +7,7 @@ import chisel3._
 
 class Decoder extends Module {
   val io = IO(new Bundle {
+    val act = Input(Bool())
     val instr_raw = Input(UInt(32.W))
     val decoder_rtype = Output(new InstrRtype())
     val decoder_itype = Output(new InstrItype())
@@ -31,6 +32,16 @@ class Decoder extends Module {
     val STORE = BigInt("0100011", 2)
     val LOAD = BigInt("0000011", 2)
     val BRANCH = BigInt("1100011", 2)
+  }
+
+  when(RegNext(io.act)) {
+    // TODO: change output based on the instr
+    printf(
+      "[Decoder] rtype: rs1 = %d, rs2 = %d, rd = %d\n",
+      io.decoder_rtype.rs1,
+      io.decoder_rtype.rs2,
+      io.decoder_rtype.rd
+    )
   }
 
   io.decoder_rtype := RegNext(io.instr_raw.asTypeOf(new InstrRtype))

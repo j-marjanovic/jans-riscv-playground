@@ -29,8 +29,9 @@ class ALU extends Module {
 
   val alu_out = Reg(UInt(32.W))
 
-  // TODO: sign ext
-  val store_out = RegNext(op1 + Cat(io.decoder_stype.imm11_5, io.decoder_stype.imm4_0))
+  val store_imm =
+    WireInit(SInt(32.W), Cat(io.decoder_stype.imm11_5, io.decoder_stype.imm4_0).asSInt())
+  val store_out = RegNext(op1 + store_imm.asUInt())
 
   io.dout := Mux(
     io.enable_op_lui,

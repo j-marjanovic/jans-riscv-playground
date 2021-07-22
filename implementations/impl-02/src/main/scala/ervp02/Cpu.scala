@@ -65,13 +65,20 @@ class Cpu extends MultiIOModule {
   mod_fetch.io.mem_instr.din := mem_instr.din
 
   // decode
+  mod_decoder.io.act := state === State.sDecode
   mod_decoder.io.instr_raw := mod_fetch.io.instr_raw
 
   // reg file
+  mod_reg_file.io.act := state === State.sRegRead
   mod_reg_file.io.rs1 := mod_decoder.io.decoder_rtype.rs1
   mod_reg_file.io.rs2 := mod_decoder.io.decoder_rtype.rs2
   mod_reg_file.io.rd := mod_decoder.io.decoder_rtype.rd
-  mod_reg_file.io.we := state === State.sStore // TODO: only certain instrs
+  mod_reg_file.io.we := state === State.sStore &&
+    (mod_decoder.io.enable_op_alu ||
+      mod_decoder.io.enable_op_alu_imm ||
+      mod_decoder.io.enable_op_lui ||
+      mod_decoder.io.enable_op_load) // TODO: check if more instr needed
+
   // din, we
 
   // alu

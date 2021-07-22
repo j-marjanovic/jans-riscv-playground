@@ -23,11 +23,15 @@ class StoreLoad extends Module {
     val mem_data = new MemoryInterface(32, 10)
   })
 
+  when (io.act) {
+    printf("[StoreLoad] addr = %x, data = %x\n", io.addr, io.din);
+  }
+
   io.mem_data.addr := io.addr
   io.mem_data.dout := io.din
   io.mem_data.we := io.enable_op_store && io.act
   io.dout := io.mem_data.din
 
-  io.valid := RegNext(io.enable_op_load || io.enable_op_store)
+  io.valid := RegNext((io.enable_op_load || io.enable_op_store) && io.act)
 
 }

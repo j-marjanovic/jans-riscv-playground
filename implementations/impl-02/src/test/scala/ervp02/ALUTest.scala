@@ -72,4 +72,26 @@ class ALUTest extends SteppedHWIOTester {
   step(1)
   expect(device_under_test.io.dout, 21)
 
+  // combinatorial influence of the enables to the input
+  step(1)
+
+  // 21c:	feb50fa3          	sb	a1,-1(a0)
+  poke(device_under_test.io.decoder_stype, 0xfeb50fa3L)
+  poke(device_under_test.io.reg_din1, 0x1000)
+  poke(device_under_test.io.reg_din2, 123)
+  poke(device_under_test.io.enable_op_alu, 0)
+  poke(device_under_test.io.enable_op_alu_imm, 0)
+  poke(device_under_test.io.enable_op_store, 1)
+  step(1)
+  expect(device_under_test.io.dout, 0xFFF)
+
+  // 220:	fec58f23          	sb	a2,-2(a1)
+  poke(device_under_test.io.decoder_stype, 0xfec58f23L)
+  poke(device_under_test.io.reg_din1, 0x1000)
+  poke(device_under_test.io.reg_din2, 123)
+  poke(device_under_test.io.enable_op_alu, 0)
+  poke(device_under_test.io.enable_op_alu_imm, 0)
+  poke(device_under_test.io.enable_op_store, 1)
+  step(1)
+  expect(device_under_test.io.dout, 0xFFE)
 }
