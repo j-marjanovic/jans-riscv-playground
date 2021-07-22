@@ -3,11 +3,9 @@
 
 package ervp02
 
-import chisel3.iotesters.ChiselFlatSpec
-import chisel3.iotesters
+import chisel3.iotesters._
 
 class ERVP02test extends ChiselFlatSpec {
-  behavior of "ERVP02"
 
   it should "should check the decoder" in {
     assertTesterPasses(new DecoderTest())
@@ -22,7 +20,7 @@ class ERVP02test extends ChiselFlatSpec {
   }
 
   it should "check the CPU" in {
-    iotesters.Driver.execute(
+    Driver.execute(
       Array(
         "--backend-name",
         "verilator",
@@ -37,6 +35,6 @@ class ERVP02test extends ChiselFlatSpec {
       () => new Cpu
     ) { c =>
       new CpuTest(c)
-    }
+    } should be(true)
   }
 }

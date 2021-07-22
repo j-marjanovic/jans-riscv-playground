@@ -11,12 +11,16 @@ class ALUWrapper extends Module {
   val io = IO(new Bundle {
     val decoder_rtype = Input(UInt(32.W))
     val decoder_itype = Input(UInt(32.W))
+    val decoder_stype = Input(UInt(32.W))
+    val decoder_utype = Input(UInt(32.W))
 
     val reg_din1 = Input(UInt(32.W))
     val reg_din2 = Input(UInt(32.W))
 
     val enable_op_alu = Input(Bool())
     val enable_op_alu_imm = Input(Bool())
+    val enable_op_store = Input(Bool())
+    val enable_op_lui = Input(Bool())
 
     val dout = Output(UInt(32.W))
   })
@@ -24,15 +28,18 @@ class ALUWrapper extends Module {
   val mod = Module(new ALU())
   mod.io.decoder_rtype := io.decoder_rtype.asTypeOf(new InstrRtype)
   mod.io.decoder_itype := io.decoder_itype.asTypeOf(new InstrItype)
+  mod.io.decoder_stype := io.decoder_stype.asTypeOf(new InstrStype)
+  mod.io.decoder_utype := io.decoder_utype.asTypeOf(new InstrUtype)
 
   mod.io.reg_din1 <> io.reg_din1
   mod.io.reg_din2 <> io.reg_din2
 
   mod.io.enable_op_alu <> io.enable_op_alu
   mod.io.enable_op_alu_imm <> io.enable_op_alu_imm
+  mod.io.enable_op_store <> io.enable_op_store
+  mod.io.enable_op_lui <> io.enable_op_lui
 
   mod.io.dout <> io.dout
-
 }
 
 class ALUTest extends SteppedHWIOTester {

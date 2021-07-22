@@ -78,15 +78,18 @@ class Cpu extends MultiIOModule {
   mod_alu.io.decoder_rtype := mod_decoder.io.decoder_rtype
   mod_alu.io.decoder_itype := mod_decoder.io.decoder_itype
   mod_alu.io.decoder_utype := mod_decoder.io.decoder_utype
+  mod_alu.io.decoder_stype := mod_decoder.io.decoder_stype
   mod_alu.io.reg_din1 := mod_reg_file.io.dout1
   mod_alu.io.reg_din2 := mod_reg_file.io.dout2
   mod_alu.io.enable_op_alu := mod_decoder.io.enable_op_alu
   mod_alu.io.enable_op_alu_imm := mod_decoder.io.enable_op_alu_imm
   mod_alu.io.enable_op_lui := mod_decoder.io.enable_op_lui
+  mod_alu.io.enable_op_store := mod_decoder.io.enable_op_store
 
   // store/load
   // mod_store_load.io.decoder_itype := mod_decoder.io.decoder_itype
   // mod_store_load.io.decoder_stype <> DontCare // TODO
+  mod_store_load.io.act := state === State.sExec2
   mod_store_load.io.enable_op_store := mod_decoder.io.enable_op_store
   mod_store_load.io.enable_op_load := mod_decoder.io.enable_op_load
   mod_store_load.io.addr := mod_alu.io.dout // TODO: check
