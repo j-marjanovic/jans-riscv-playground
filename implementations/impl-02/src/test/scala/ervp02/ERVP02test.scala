@@ -7,19 +7,19 @@ import chisel3.iotesters._
 
 class ERVP02test extends ChiselFlatSpec {
 
-  it should "should check the decoder" in {
+  it should "check the decoder" in {
     assertTesterPasses(new DecoderTest())
   }
 
-  it should "should check the register file" in {
+  it should "check the register file" in {
     assertTesterPasses(new RegFileTest())
   }
 
-  it should "should check the ALU" in {
+  it should "check the ALU" in {
     assertTesterPasses(new ALUTest())
   }
 
-  it should "should check the branch controller" in {
+  it should "check the branch controller" in {
     assertTesterPasses(new BranchTest())
   }
 
