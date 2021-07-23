@@ -19,7 +19,11 @@ class ERVP02test extends ChiselFlatSpec {
     assertTesterPasses(new ALUTest())
   }
 
-  it should "check the CPU" in {
+  it should "should check the branch controller" in {
+    assertTesterPasses(new BranchTest())
+  }
+
+  it should "check the CPU ALU" in {
     Driver.execute(
       Array(
         "--backend-name",
@@ -28,13 +32,32 @@ class ERVP02test extends ChiselFlatSpec {
         "--test-seed",
         "1234",
         "--target-dir",
-        "test_run_dir/CpuTest",
+        "test_run_dir/CpuTestAlu",
         "--top-name",
-        "CpuTest"
+        "CpuTestAlu"
       ),
       () => new Cpu
     ) { c =>
-      new CpuTest(c)
+      new CpuTestAlu(c)
+    } should be(true)
+  }
+
+  ignore should "check the CPU branching" in {
+    Driver.execute(
+      Array(
+        "--backend-name",
+        "verilator",
+        "--fint-write-vcd",
+        "--test-seed",
+        "1234",
+        "--target-dir",
+        "test_run_dir/CpuTestBranch",
+        "--top-name",
+        "CpuTestBranch"
+      ),
+      () => new Cpu
+    ) { c =>
+      new CpuTestBranch(c)
     } should be(true)
   }
 }

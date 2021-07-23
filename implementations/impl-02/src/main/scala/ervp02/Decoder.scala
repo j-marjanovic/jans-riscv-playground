@@ -13,6 +13,7 @@ class Decoder extends Module {
     val decoder_itype = Output(new InstrItype())
     val decoder_utype = Output(new InstrUtype())
     val decoder_stype = Output(new InstrStype())
+    val decoder_btype = Output(new InstrBtype())
 
     val enable_op_alu = Output(Bool())
     val enable_op_alu_imm = Output(Bool())
@@ -48,6 +49,7 @@ class Decoder extends Module {
   io.decoder_itype := RegNext(io.instr_raw.asTypeOf(new InstrItype))
   io.decoder_utype := RegNext(io.instr_raw.asTypeOf(new InstrUtype))
   io.decoder_stype := RegNext(io.instr_raw.asTypeOf(new InstrStype))
+  io.decoder_btype := RegNext(io.instr_raw.asTypeOf(new InstrBtype))
 
   io.enable_op_alu := RegNext(io.instr_raw(6, 0) === Rv32Instr.ALU.U)
   io.enable_op_alu_imm := RegNext(io.instr_raw(6, 0) === Rv32Instr.ALU_IMM.U)

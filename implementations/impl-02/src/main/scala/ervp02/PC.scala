@@ -8,8 +8,9 @@ import chisel3._
 class PC extends Module {
   val io = IO(new Bundle {
     val inc_by_4 = Input(Bool())
-    val load = Input(Bool())
-    val new_pc = Input(UInt(32.W))
+
+    val add_offs = Input(Bool())
+    val offs = Input(SInt(13.W))
 
     val pc = Output(UInt(32.W))
   })
@@ -19,7 +20,7 @@ class PC extends Module {
 
   when (io.inc_by_4) {
     pc := pc + 4.U
-  } .elsewhen (io.load) {
-    pc := io.new_pc
+  } .elsewhen (io.add_offs) {
+    pc := (pc.asSInt() + io.offs).asUInt()
   }
 }

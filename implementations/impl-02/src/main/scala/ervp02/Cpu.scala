@@ -23,6 +23,7 @@ class Cpu extends MultiIOModule {
   val mod_reg_file = Module(new RegFile())
   val mod_alu = Module(new ALU())
   val mod_store_load = Module(new StoreLoad())
+  val mod_branch = Module(new Branch())
   val mod_pc = Module(new PC())
 
   // controller
@@ -109,14 +110,21 @@ class Cpu extends MultiIOModule {
     Mux(mod_decoder.io.enable_op_store, mod_store_load.io.dout, 0.U)
   )
 
+  // branch
+  mod_branch.io.act := state === State.sExec && mod_decoder.io.enable_op_branch
+  mod_branch.io.decoder_btype := mod_decoder.io.decoder_btype
+  mod_branch.io.reg_din1 := mod_reg_file.io.dout1
+  mod_branch.io.reg_din2 := mod_reg_file.io.dout2
+
   // program counter
   mod_pc.io.inc_by_4 := state === State.sStore &&
-    (mod_decoder.io.enable_op_alu ||
+    ((mod_decoder.io.enable_op_alu ||
       mod_decoder.io.enable_op_alu_imm ||
       mod_decoder.io.enable_op_store ||
       mod_decoder.io.enable_op_load ||
-      mod_decoder.io.enable_op_lui)
+      mod_decoder.io.enable_op_lui) ||
+      (mod_decoder.io.enable_op_branch && mod_branch.io.pc_inc))
 
-  mod_pc.io.new_pc := 0.U // TODO - connect to branch
-  mod_pc.io.load := false.B // TODO - connect to branch
+  mod_pc.io.add_offs := state === State.sStore && mod_decoder.io.enable_op_branch && mod_branch.io.pc_load
+  mod_pc.io.offs := mod_branch.io.pc_offs
 }
