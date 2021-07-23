@@ -96,16 +96,14 @@ object ElfParser {
     val ph_entry_len: Int = phEntry.sizeBound.exact.get.toInt / 8
     assert(hdr.e_phentsize == ph_entry_len)
     val skipped = elf.skip(hdr.e_phoff)
-    println(f"ph offs = 0x${hdr.e_phoff}%x, 0x${skipped}%x")
 
     for (_ <- 0 until hdr.e_phnum) {
       val entry_raw: Array[Byte] = elf.readNBytes(ph_entry_len)
-      println(entry_raw.toList)
       val entry: PhEntry = phEntry.decode(ByteVector.view(entry_raw).toBitVector).require.value
       ph_entries += entry
     }
 
-    // a hackish workaround for a lack of `lseek(SET)`
+    // a hackish workaround for a lack of `lseek(SEEK_SET)`
     elf.skip(-skipped)
     elf.skip(-ph_entry_len * hdr.e_phnum)
 
@@ -131,7 +129,7 @@ object ElfParser {
       if (ph_entry.p_type == PT_LOAD) {
         elf.skip(ph_entry.p_offset.toInt)
         val mem: Array[Byte] = elf.readNBytes(ph_entry.p_filesz.toInt)
-        elf.skip(-ph_entry.p_offset.toInt)
+        elf.skip(-ph_entry.p_offset.toInt) // no `lseek(SEEK_SET)`
 
         val mem_expanded =
           mem ++ Array.fill[Byte](ph_entry.p_memsz.toInt - ph_entry.p_filesz.toInt)(0.toByte)

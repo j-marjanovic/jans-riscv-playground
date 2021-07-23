@@ -63,7 +63,7 @@ class Cpu extends MultiIOModule {
 
   // fetch
   mod_fetch.io.pc := mod_pc.io.pc
-  mem_instr.addr := mod_fetch.io.mem_instr.addr
+  mem_instr.addr := mod_fetch.io.mem_instr.addr / 4.U
   mod_fetch.io.mem_instr.din := mem_instr.din
 
   // decode
@@ -108,7 +108,8 @@ class Cpu extends MultiIOModule {
   mod_reg_file.io.din := Mux(
     mod_decoder.io.enable_op_alu || mod_decoder.io.enable_op_alu_imm || mod_decoder.io.enable_op_lui,
     mod_alu.io.dout,
-    Mux(mod_decoder.io.enable_op_store, mod_store_load.io.dout, 0.U)
+    Mux(mod_decoder.io.enable_op_store, mod_store_load.io.dout,
+      Mux(mod_decoder.io.enable_op_jal, mod_pc.io.pc + 4.U, 0.U))
   )
 
   // branch

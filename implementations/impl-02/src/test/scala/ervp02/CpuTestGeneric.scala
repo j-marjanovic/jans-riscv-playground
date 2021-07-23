@@ -69,7 +69,7 @@ abstract class CpuTestGeneric(c: Cpu) extends PeekPokeTester(c) {
     println(f"Last instr addr = 0x${last_addr}%x")
 
     while (true) {
-      val addr = peek(c.mem_instr.addr).toInt
+      val addr = peek(c.mem_instr.addr).toInt * 4
       if (addr > last_addr) {
         println("Last instr, exiting")
         return

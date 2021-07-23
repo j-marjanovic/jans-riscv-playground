@@ -60,4 +60,23 @@ class ERVP02test extends ChiselFlatSpec {
       new CpuTestBranch(c)
     } should be(true)
   }
+
+  it should "check the entire SoC" in {
+    Driver.execute(
+      Array(
+        "--backend-name",
+        "verilator",
+        "--fint-write-vcd",
+        "--test-seed",
+        "1234",
+        "--target-dir",
+        "test_run_dir/SocTest",
+        "--top-name",
+        "SocTest"
+      ),
+      () => new ERVP02
+    ) { c =>
+      new SocTest(c)
+    } should be(true)
+  }
 }

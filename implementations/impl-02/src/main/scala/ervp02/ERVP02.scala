@@ -81,12 +81,12 @@ class ERVP02 extends MultiIOModule {
   mod_instr_mem.io.addra := mod_cpu.mem_instr.addr
   mod_instr_mem.io.dina := mod_cpu.mem_instr.dout
   mod_instr_mem.io.wea := mod_cpu.mem_instr.we
-  mod_cpu.mem_instr.din := mod_instr_mem.io.doutb
+  mod_cpu.mem_instr.din := mod_instr_mem.io.douta
 
   mod_data_mem.io.addra := mod_cpu.mem_data.addr
   mod_data_mem.io.dina := mod_cpu.mem_data.dout
   mod_data_mem.io.wea := mod_cpu.mem_data.we
-  mod_cpu.mem_data.din := mod_data_mem.io.doutb
+  mod_cpu.mem_data.din := mod_data_mem.io.douta
 
   mod_cpu.enable := mod_ctrl.io.out("CONTROL_ENABLE")
 
