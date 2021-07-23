@@ -47,4 +47,13 @@ package object ervp02 {
     val imm11 = UInt(1.W)
     val opcode = UInt(7.W)
   }
+
+  class InstrJtype extends Bundle {
+    val imm20 = UInt(1.W)
+    val imm10_1 = UInt(10.W)
+    val imm11 = UInt(1.W)
+    val imm19_12 = UInt(8.W)
+    val rd = UInt(5.W)
+    val opcode = UInt(7.W)
+  }
 }

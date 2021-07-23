@@ -24,6 +24,7 @@ class Cpu extends MultiIOModule {
   val mod_alu = Module(new ALU())
   val mod_store_load = Module(new StoreLoad())
   val mod_branch = Module(new Branch())
+  val mod_jump = Module(new Jump())
   val mod_pc = Module(new PC())
 
   // controller
@@ -116,6 +117,9 @@ class Cpu extends MultiIOModule {
   mod_branch.io.reg_din1 := mod_reg_file.io.dout1
   mod_branch.io.reg_din2 := mod_reg_file.io.dout2
 
+  // jump
+  mod_jump.io.decoder_jtype := mod_decoder.io.decoder_jtype
+
   // program counter
   mod_pc.io.inc_by_4 := state === State.sStore &&
     ((mod_decoder.io.enable_op_alu ||
@@ -127,4 +131,8 @@ class Cpu extends MultiIOModule {
 
   mod_pc.io.add_offs := state === State.sStore && mod_decoder.io.enable_op_branch && mod_branch.io.pc_load
   mod_pc.io.offs := mod_branch.io.pc_offs
+
+  mod_pc.io.jump := state === State.sStore && mod_decoder.io.enable_op_jal
+  mod_pc.io.jump_offs := mod_jump.io.jump_offs
+
 }

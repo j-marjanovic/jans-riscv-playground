@@ -6,13 +6,13 @@ package ervp02
 import chisel3.iotesters.PeekPokeTester
 import chisel3._
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
 import scala.util.matching.Regex
 
 class MemDummy(val peek: Bits => BigInt) {
   class MemTx(val addr: BigInt, val data: BigInt)
 
-  val mem_txs = ListBuffer[MemTx]()
+  val mem_txs = mutable.ListBuffer[MemTx]()
 
   def check_data(c: Cpu): Unit = {
     val we = peek(c.mem_data.we)
@@ -29,10 +29,10 @@ abstract class CpuTestGeneric(c: Cpu) extends PeekPokeTester(c) {
   val INSTRS: String
   def final_check(): Unit
 
-  def bfm_peek(bs: Bits): BigInt = this.peek(bs)
-  val mem_dummy = new MemDummy(bfm_peek)
+  private def bfm_peek(bs: Bits): BigInt = this.peek(bs)
+  protected val mem_dummy = new MemDummy(bfm_peek)
 
-  def wait_for_next_pc(callback: () => Unit = () => {}): Unit = {
+  private def wait_for_next_pc(callback: () => Unit = () => {}): Unit = {
     var timeout = 100
     var pc = peek(c.mem_instr.addr)
     val pc_prev = pc
@@ -47,24 +47,44 @@ abstract class CpuTestGeneric(c: Cpu) extends PeekPokeTester(c) {
     }
   }
 
-  def exec() {
-    val LINE_FMT: Regex = raw"\s*([0-9a-fA-F]+):\s+([0-9a-fA-F]+)\s+(.*)".r
+  val instr_mem = mutable.Map[Int, (BigInt, String)]()
 
+  private def parse_cmds(): Unit = {
+    val LINE_FMT: Regex = raw"\s*([0-9a-fA-F]+):\s+([0-9a-fA-F]+)\s+(.*)".r
     for (line <- INSTRS.split("\n")) {
       val m: Option[Regex.Match] = LINE_FMT.findFirstMatchIn(line)
       if (m.isDefined) {
         val m_ = m.get
-        val instr_addr = m_.group(1)
+        val instr_addr: Int = BigInt(m_.group(1), 16).toInt
         val instr_raw: BigInt = BigInt(m_.group(2), 16)
-        val instr_comment = m_.group(3)
-        println(f"execution instr '${instr_comment}' = 0x${instr_raw}%08x")
+        val instr_comment: String = m_.group(3)
 
-        poke(c.enable, 1)
-        poke(c.mem_instr.din, instr_raw)
-        wait_for_next_pc(() => mem_dummy.check_data(c))
+        instr_mem += (instr_addr -> (instr_raw, instr_comment))
       }
     }
+  }
 
+  private def exec_cmds(): Unit = {
+    val last_addr = instr_mem.keys.toList.sorted.last
+    println(f"Last instr addr = 0x${last_addr}%x")
+
+    while (true) {
+      val addr = peek(c.mem_instr.addr).toInt
+      if (addr > last_addr) {
+        println("Last instr, exiting")
+        return
+      }
+      val instr = instr_mem(addr)
+      println(s"Executing ${instr._2}")
+      poke(c.mem_instr.din, instr._1)
+      wait_for_next_pc(() => mem_dummy.check_data(c))
+    }
+  }
+
+  def run_test() {
+    parse_cmds()
+    poke(c.enable, 1)
+    exec_cmds()
     final_check()
   }
 }
@@ -97,7 +117,7 @@ class CpuTestAlu(c: Cpu) extends CpuTestGeneric(c) {
     // TODO: add byte enable
   }
 
-  exec()
+  run_test()
 }
 
 class CpuTestBranch(c: Cpu) extends CpuTestGeneric(c) {
@@ -111,19 +131,25 @@ class CpuTestBranch(c: Cpu) extends CpuTestGeneric(c) {
       |
       |00000214 <set_to_1>:
       | 214:	00100513          	li	a0,1
-      | 218:	0180006f          	j	230 <exit>
+      | 218:	0100006f          	j	228 <write_data>
       |
       |0000021c <set_to_2>:
       | 21c:	00200513          	li	a0,2
-      | 220:	0100006f          	j	230 <exit>
+      | 220:	0080006f          	j	228 <write_data>
       |
       |00000224 <set_to_3>:
       | 224:	00300513          	li	a0,3
+      |
+      |00000228 <write_data>:
       | 228:	000022b7          	lui	t0,0x2
       | 22c:	00a2a023          	sw	a0,0(t0) # 2000 <_end+0x1dbc>
       |""".stripMargin
 
-  override def final_check(): Unit = {}
+  override def final_check(): Unit = {
+    val mem_txs = mem_dummy.mem_txs.toList
+    expect(mem_txs.head.addr == 0, "mem addr 0")
+    expect(mem_txs.head.data == 0x2, "mem data 0")
+  }
 
-  exec()
+  run_test()
 }

@@ -42,7 +42,7 @@ class ERVP02test extends ChiselFlatSpec {
     } should be(true)
   }
 
-  ignore should "check the CPU branching" in {
+  it should "check the CPU branching" in {
     Driver.execute(
       Array(
         "--backend-name",

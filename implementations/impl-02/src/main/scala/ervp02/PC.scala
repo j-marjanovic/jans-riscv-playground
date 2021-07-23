@@ -12,6 +12,9 @@ class PC extends Module {
     val add_offs = Input(Bool())
     val offs = Input(SInt(13.W))
 
+    val jump_offs = Input(SInt(21.W))
+    val jump = Input(Bool())
+
     val pc = Output(UInt(32.W))
   })
 
@@ -20,6 +23,8 @@ class PC extends Module {
 
   when (io.inc_by_4) {
     pc := pc + 4.U
+  } .elsewhen (io.jump) {
+    pc := (pc.asSInt() + io.jump_offs).asUInt()
   } .elsewhen (io.add_offs) {
     pc := (pc.asSInt() + io.offs).asUInt()
   }
