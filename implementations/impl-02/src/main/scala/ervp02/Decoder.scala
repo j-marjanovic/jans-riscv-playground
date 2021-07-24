@@ -16,6 +16,7 @@ class Decoder extends Module {
     val decoder_btype = Output(new InstrBtype())
     val decoder_jtype = Output(new InstrJtype())
 
+    val enable_op_auipc = Output(Bool())
     val enable_op_alu = Output(Bool())
     val enable_op_alu_imm = Output(Bool())
     val enable_op_store = Output(Bool())
@@ -29,6 +30,7 @@ class Decoder extends Module {
   object Rv32Instr extends Enumeration {
     type Rv32Instr = Value
 
+    val AUIPC = BigInt("0010111", 2)
     val JAL = BigInt("1101111", 2)
     val LUI = BigInt("0110111", 2)
     val ALU = BigInt("0110011", 2)
@@ -55,6 +57,7 @@ class Decoder extends Module {
   io.decoder_btype := RegNext(io.instr_raw.asTypeOf(new InstrBtype))
   io.decoder_jtype := RegNext(io.instr_raw.asTypeOf(new InstrJtype))
 
+  io.enable_op_auipc := RegNext(io.instr_raw(6, 0) === Rv32Instr.AUIPC.U)
   io.enable_op_alu := RegNext(io.instr_raw(6, 0) === Rv32Instr.ALU.U)
   io.enable_op_alu_imm := RegNext(io.instr_raw(6, 0) === Rv32Instr.ALU_IMM.U)
   io.enable_op_store := RegNext(io.instr_raw(6, 0) === Rv32Instr.STORE.U)

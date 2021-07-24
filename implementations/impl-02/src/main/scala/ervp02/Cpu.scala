@@ -79,7 +79,8 @@ class Cpu extends MultiIOModule {
     (mod_decoder.io.enable_op_alu ||
       mod_decoder.io.enable_op_alu_imm ||
       mod_decoder.io.enable_op_lui ||
-      mod_decoder.io.enable_op_load) // TODO: check if more instr needed
+      mod_decoder.io.enable_op_load ||
+      mod_decoder.io.enable_op_auipc) // TODO: check if more instr needed
 
   // din, we
 
@@ -108,8 +109,19 @@ class Cpu extends MultiIOModule {
   mod_reg_file.io.din := Mux(
     mod_decoder.io.enable_op_alu || mod_decoder.io.enable_op_alu_imm || mod_decoder.io.enable_op_lui,
     mod_alu.io.dout,
-    Mux(mod_decoder.io.enable_op_store, mod_store_load.io.dout,
-      Mux(mod_decoder.io.enable_op_jal, mod_pc.io.pc + 4.U, 0.U))
+    Mux(
+      mod_decoder.io.enable_op_store,
+      mod_store_load.io.dout,
+      Mux(
+        mod_decoder.io.enable_op_jal,
+        mod_pc.io.pc + 4.U,
+        Mux(
+          mod_decoder.io.enable_op_auipc,
+          mod_pc.io.pc + (mod_decoder.io.decoder_utype.imm20 << 12.U),
+          0.U
+        )
+      )
+    )
   )
 
   // branch
@@ -127,7 +139,8 @@ class Cpu extends MultiIOModule {
       mod_decoder.io.enable_op_alu_imm ||
       mod_decoder.io.enable_op_store ||
       mod_decoder.io.enable_op_load ||
-      mod_decoder.io.enable_op_lui) ||
+      mod_decoder.io.enable_op_lui ||
+      mod_decoder.io.enable_op_auipc) ||
       (mod_decoder.io.enable_op_branch && mod_branch.io.pc_inc))
 
   mod_pc.io.add_offs := state === State.sStore && mod_decoder.io.enable_op_branch && mod_branch.io.pc_load
