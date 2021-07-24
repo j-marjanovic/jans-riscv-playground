@@ -23,6 +23,14 @@ ERVP stands for Experimental RISC-V Processor
 
 ## Notes
 
+### 2021-07-23
+
+#### linker scripts
+
+`"elf32-littleriscv"`
+
+https://www.sifive.com/blog/all-aboard-part-3-linker-relaxation-in-riscv-toolchain
+
 ### 2021-07-21
 
 #### MIT 6.004
