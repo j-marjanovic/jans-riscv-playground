@@ -59,7 +59,7 @@ class SocTest(c: ERVP02) extends BfmTester(c) with AxiLiteHelper {
   assert((mem_instr.ph_entry.p_flags.toInt & 0x5) == 0x5) // Read, Execute
 
   val NR_INSTR_TO_LOAD = 200
-  val NR_INSTR_TO_EXEC = 5
+  val NR_INSTR_TO_EXEC = 6
   for ((instr, i) <- mem_instr.mem.grouped(4).take(NR_INSTR_TO_LOAD).zipWithIndex) {
     val mem_word = instr.foldRight(0) { (a: Byte, b: Int) => (b << 8) | (a & 0xff) }
     println(f"mem addr = ${i * 4}%08x, data = ${mem_word}%08x")

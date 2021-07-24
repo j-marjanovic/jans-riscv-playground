@@ -81,9 +81,8 @@ class Cpu extends MultiIOModule {
       mod_decoder.io.enable_op_alu_imm ||
       mod_decoder.io.enable_op_lui ||
       mod_decoder.io.enable_op_load ||
-      mod_decoder.io.enable_op_auipc) // TODO: check if more instr needed
-
-  // din, we
+      mod_decoder.io.enable_op_auipc ||
+      mod_decoder.io.enable_op_jal) // TODO: check if more instr needed
 
   // alu
   mod_alu.io.decoder_rtype := mod_decoder.io.decoder_rtype

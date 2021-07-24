@@ -74,17 +74,21 @@ class Decoder extends Module {
         )
       }
     }
-    when (io.enable_op_load) {
-      printf("[Decoder] LOAD") // TODO
+    when(io.enable_op_load) {
+      printf("[Decoder] LOAD\n") // TODO
     }
-    when (io.enable_op_branch) {
-      printf("[Decoder] BRANCH") // TODO
+    when(io.enable_op_branch) {
+      printf("[Decoder] BRANCH\n") // TODO
     }
-    when (io.enable_op_lui) {
-      printf("[Decoder] LUI") // TODO
+    when(io.enable_op_lui) {
+      printf("[Decoder] LUI\n") // TODO
     }
-    when (io.enable_op_jal) {
-      printf("[Decoder] JAL") // TODO
+    when(io.enable_op_jal) {
+      printf(
+        "[Decoder] JAL, rd = %d, imm = 0x%x\n",
+        io.decoder_jtype.rd,
+        instr_jtype_imm(io.decoder_jtype)
+      )
     }
   }
 

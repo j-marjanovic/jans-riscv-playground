@@ -2,6 +2,7 @@
 // This code is licensed under a 3-clause BSD license - see LICENSE.txt
 
 import chisel3._
+import chisel3.util.Cat
 
 package object ervp02 {
 
@@ -56,4 +57,13 @@ package object ervp02 {
     val rd = UInt(5.W)
     val opcode = UInt(7.W)
   }
+
+  def instr_jtype_imm(decoder_jtype: InstrJtype): UInt =
+    Cat(
+      decoder_jtype.imm20,
+      decoder_jtype.imm19_12,
+      decoder_jtype.imm11,
+      decoder_jtype.imm10_1,
+      0.U(1.W)
+    )
 }
