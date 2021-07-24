@@ -20,6 +20,7 @@ class ALU extends Module {
     val enable_op_alu_imm = Input(Bool())
     val enable_op_lui = Input(Bool())
     val enable_op_store = Input(Bool())
+    val enable_op_load = Input(Bool())
     val enable_op_jalr = Input(Bool())
 
     val dout = Output(UInt(32.W))
@@ -32,14 +33,18 @@ class ALU extends Module {
 
   val alu_out = Reg(UInt(32.W))
 
-  val store_imm =
+  val store_imm: SInt =
     WireInit(SInt(32.W), Cat(io.decoder_stype.imm11_5, io.decoder_stype.imm4_0).asSInt())
   val store_out = RegNext(op1 + store_imm.asUInt())
+
+  val load_imm: SInt = WireInit(SInt(32.W), io.decoder_itype.imm.asSInt())
+  val load_out = RegNext(op1 + load_imm.asUInt())
 
   io.dout := Mux(
     io.enable_op_lui,
     (io.decoder_utype.imm20 << 12).asUInt(),
-    Mux(io.enable_op_store, store_out, alu_out)
+    Mux(io.enable_op_store, store_out,
+      Mux(io.enable_op_load, load_out, alu_out))
   )
 
   // TODO: check those operations

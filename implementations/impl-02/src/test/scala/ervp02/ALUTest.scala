@@ -20,6 +20,7 @@ class ALUWrapper extends Module {
     val enable_op_alu = Input(Bool())
     val enable_op_alu_imm = Input(Bool())
     val enable_op_store = Input(Bool())
+    val enable_op_load = Input(Bool())
     val enable_op_lui = Input(Bool())
     val enable_op_jalr = Input(Bool())
 
@@ -38,6 +39,7 @@ class ALUWrapper extends Module {
   mod.io.enable_op_alu <> io.enable_op_alu
   mod.io.enable_op_alu_imm <> io.enable_op_alu_imm
   mod.io.enable_op_store <> io.enable_op_store
+  mod.io.enable_op_load <> io.enable_op_load
   mod.io.enable_op_lui <> io.enable_op_lui
   mod.io.enable_op_jalr <> io.enable_op_jalr
 

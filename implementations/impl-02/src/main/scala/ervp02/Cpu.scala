@@ -95,23 +95,22 @@ class Cpu(val instr_addr_w : Int, val data_addr_w : Int) extends MultiIOModule {
   mod_alu.io.enable_op_alu_imm := mod_decoder.io.enable_op_alu_imm
   mod_alu.io.enable_op_lui := mod_decoder.io.enable_op_lui
   mod_alu.io.enable_op_store := mod_decoder.io.enable_op_store
+  mod_alu.io.enable_op_load := mod_decoder.io.enable_op_load
   mod_alu.io.enable_op_jalr := mod_decoder.io.enable_op_jalr
 
   // store/load
-  // mod_store_load.io.decoder_itype := mod_decoder.io.decoder_itype
-  // mod_store_load.io.decoder_stype <> DontCare // TODO
   mod_store_load.io.act := state === State.sExec2
   mod_store_load.io.enable_op_store := mod_decoder.io.enable_op_store
   mod_store_load.io.enable_op_load := mod_decoder.io.enable_op_load
-  mod_store_load.io.addr := mod_alu.io.dout // TODO: check
-  mod_store_load.io.din := mod_reg_file.io.dout2 // TODO: check
+  mod_store_load.io.addr := mod_alu.io.dout
+  mod_store_load.io.din := mod_reg_file.io.dout2
   mod_store_load.io.mem_data <> mem_data
 
   mod_reg_file.io.din := Mux(
     mod_decoder.io.enable_op_alu || mod_decoder.io.enable_op_alu_imm || mod_decoder.io.enable_op_lui,
     mod_alu.io.dout,
     Mux(
-      mod_decoder.io.enable_op_store,
+      mod_decoder.io.enable_op_load,
       mod_store_load.io.dout,
       Mux(
         mod_decoder.io.enable_op_jal || mod_decoder.io.enable_op_jalr,
