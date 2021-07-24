@@ -36,7 +36,7 @@ class ERVP02test extends ChiselFlatSpec {
         "--top-name",
         "CpuTestAlu"
       ),
-      () => new Cpu
+      () => new Cpu(10, 10)
     ) { c =>
       new CpuTestAlu(c)
     } should be(true)
@@ -55,7 +55,7 @@ class ERVP02test extends ChiselFlatSpec {
         "--top-name",
         "CpuTestBranch"
       ),
-      () => new Cpu
+      () => new Cpu(10, 10)
     ) { c =>
       new CpuTestBranch(c)
     } should be(true)

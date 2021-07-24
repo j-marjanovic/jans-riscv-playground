@@ -7,18 +7,18 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.ChiselEnum
 
-class Cpu extends MultiIOModule {
+class Cpu(val instr_addr_w : Int, val data_addr_w : Int) extends MultiIOModule {
   val XLEN: Int = 32
 
   // IO
-  val mem_instr = IO(new MemoryInterface(32, 10))
+  val mem_instr = IO(new MemoryInterface(32, instr_addr_w))
   mem_instr.dout := 0.U
   mem_instr.we := false.B
-  val mem_data = IO(new MemoryInterface(32, 10))
+  val mem_data = IO(new MemoryInterface(32, data_addr_w))
   val enable = IO(Input(Bool()))
 
   // modules
-  val mod_fetch = Module(new Fetch())
+  val mod_fetch = Module(new Fetch(instr_addr_w))
   val mod_decoder = Module(new Decoder())
   val mod_reg_file = Module(new RegFile())
   val mod_alu = Module(new ALU())
@@ -95,6 +95,7 @@ class Cpu extends MultiIOModule {
   mod_alu.io.enable_op_alu_imm := mod_decoder.io.enable_op_alu_imm
   mod_alu.io.enable_op_lui := mod_decoder.io.enable_op_lui
   mod_alu.io.enable_op_store := mod_decoder.io.enable_op_store
+  mod_alu.io.enable_op_jalr := mod_decoder.io.enable_op_jalr
 
   // store/load
   // mod_store_load.io.decoder_itype := mod_decoder.io.decoder_itype
@@ -113,7 +114,7 @@ class Cpu extends MultiIOModule {
       mod_decoder.io.enable_op_store,
       mod_store_load.io.dout,
       Mux(
-        mod_decoder.io.enable_op_jal,
+        mod_decoder.io.enable_op_jal || mod_decoder.io.enable_op_jalr,
         mod_pc.io.pc + 4.U,
         Mux(
           mod_decoder.io.enable_op_auipc,
@@ -149,4 +150,6 @@ class Cpu extends MultiIOModule {
   mod_pc.io.jump := state === State.sStore && mod_decoder.io.enable_op_jal
   mod_pc.io.jump_offs := mod_jump.io.jump_offs
 
+  mod_pc.io.load := state === State.sStore && (mod_decoder.io.enable_op_jal || mod_decoder.io.enable_op_jalr)
+  mod_pc.io.load_pc := mod_alu.io.dout
 }

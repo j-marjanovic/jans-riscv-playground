@@ -25,6 +25,7 @@ class Decoder extends Module {
     val enable_op_branch = Output(Bool())
     val enable_op_lui = Output(Bool())
     val enable_op_jal = Output(Bool())
+    val enable_op_jalr = Output(Bool())
     // TODO: more instr
   })
 
@@ -33,6 +34,7 @@ class Decoder extends Module {
 
     val AUIPC = BigInt("0010111", 2)
     val JAL = BigInt("1101111", 2)
+    val JALR = BigInt("1100111", 2)
     val LUI = BigInt("0110111", 2)
     val ALU = BigInt("0110011", 2)
     val ALU_IMM = BigInt("0010011", 2)
@@ -90,6 +92,15 @@ class Decoder extends Module {
         instr_jtype_imm(io.decoder_jtype)
       )
     }
+    when(io.enable_op_jalr) {
+      printf(
+        "[Decoder] JALR, rd = %d, funct3 = %d, rs1 = %d, imm = 0x%x\n",
+        io.decoder_itype.rd,
+        io.decoder_itype.funct3,
+        io.decoder_itype.rs1,
+        io.decoder_itype.imm
+      )
+    }
   }
 
   io.decoder_rtype := RegNext(io.instr_raw.asTypeOf(new InstrRtype))
@@ -107,5 +118,6 @@ class Decoder extends Module {
   io.enable_op_branch := RegNext(io.instr_raw(6, 0) === Rv32Instr.BRANCH.U)
   io.enable_op_lui := RegNext(io.instr_raw(6, 0) === Rv32Instr.LUI.U)
   io.enable_op_jal := RegNext(io.instr_raw(6, 0) === Rv32Instr.JAL.U)
+  io.enable_op_jalr := RegNext(io.instr_raw(6, 0) === Rv32Instr.JALR.U)
 
 }

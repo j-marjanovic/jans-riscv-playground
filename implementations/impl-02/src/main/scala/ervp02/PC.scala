@@ -15,6 +15,9 @@ class PC extends Module {
     val jump_offs = Input(SInt(21.W))
     val jump = Input(Bool())
 
+    val load_pc = Input(UInt(32.W))
+    val load = Input(Bool())
+
     val pc = Output(UInt(32.W))
   })
 
@@ -27,5 +30,7 @@ class PC extends Module {
     pc := (pc.asSInt() + io.jump_offs).asUInt()
   } .elsewhen (io.add_offs) {
     pc := (pc.asSInt() + io.offs).asUInt()
+  } .elsewhen (io.load) {
+    pc := io.load_pc
   }
 }

@@ -20,13 +20,15 @@ class ALU extends Module {
     val enable_op_alu_imm = Input(Bool())
     val enable_op_lui = Input(Bool())
     val enable_op_store = Input(Bool())
+    val enable_op_jalr = Input(Bool())
 
     val dout = Output(UInt(32.W))
   })
 
   val op1: UInt = WireInit(io.reg_din1)
-  val itype_imm_ext: SInt = WireInit(SInt(32.W), io.decoder_itype.imm.asSInt() )
-  val op2: UInt = Mux(io.enable_op_alu_imm, itype_imm_ext.asUInt(), io.reg_din2)
+  val itype_imm_ext: SInt = WireInit(SInt(32.W), io.decoder_itype.imm.asSInt())
+  val op2: UInt =
+    Mux(io.enable_op_alu_imm || io.enable_op_jalr, itype_imm_ext.asUInt(), io.reg_din2)
 
   val alu_out = Reg(UInt(32.W))
 
@@ -43,11 +45,14 @@ class ALU extends Module {
   // TODO: check those operations
   switch(io.decoder_rtype.funct3) {
     is(0.U) {
-      when(io.enable_op_alu && (io.decoder_rtype.funct7 === BigInt("0100000", 2).U)) {
-        alu_out := op1 - op2
-      }.otherwise {
+      when(io.enable_op_jalr) {
         alu_out := op1 + op2
-      }
+      }.elsewhen(io.enable_op_alu && (io.decoder_rtype.funct7 === BigInt("0100000", 2).U)) {
+          alu_out := op1 - op2
+        }
+        .otherwise {
+          alu_out := op1 + op2
+        }
     }
     is(1.U) {
       alu_out := op1 << op2(4, 0)

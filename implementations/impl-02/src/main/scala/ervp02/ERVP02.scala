@@ -6,7 +6,7 @@ package ervp02
 import chisel3._
 import bfmtester.util._
 import bfmtester.AxiLiteIf
-import chisel3.util.log2Up
+import chisel3.util.{log2Ceil, log2Up}
 
 class Uart extends Bundle {
   val tx = Output(Bool())
@@ -16,7 +16,8 @@ class Uart extends Bundle {
 class ERVP02 extends MultiIOModule {
   import AxiLiteSubordinateGenerator._
 
-  val MEM_INSTR_SIZE: Int = 0x1000
+  val MEM_INSTR_SIZE: Int = 0x10000
+  val MEM_DATA_SIZE: Int = 0x1000
 
   // format: off
   val area_map = new AreaMap(
@@ -37,8 +38,8 @@ class ERVP02 extends MultiIOModule {
     new Reg("CONTROL", 0x14,
       new Field("ENABLE", hw_access = Access.R,  sw_access = Access.RW, hi = 0, lo = None)
     ),
-    new Mem("INSTR", addr = MEM_INSTR_SIZE, nr_els = MEM_INSTR_SIZE, data_w = 32),
-    new Mem("DATA", addr = MEM_INSTR_SIZE*2, nr_els = MEM_INSTR_SIZE, data_w = 32),
+    new Mem("INSTR", addr = 0x1000, nr_els = MEM_INSTR_SIZE, data_w = 32),
+    new Mem("DATA", addr = 0x1000 + MEM_INSTR_SIZE, nr_els = MEM_DATA_SIZE, data_w = 32),
   )
   // format: on
 
@@ -69,7 +70,7 @@ class ERVP02 extends MultiIOModule {
   mod_ctrl.io.inp("MEM_INSTR_DOUT") := mod_instr_mem.io.doutb
 
   // data memory
-  val mod_data_mem = Module(new DualPortRam(32, MEM_INSTR_SIZE))
+  val mod_data_mem = Module(new DualPortRam(32, MEM_DATA_SIZE))
   mod_data_mem.io.clk := this.clock
   mod_data_mem.io.addrb := mod_ctrl.io.out("MEM_DATA_ADDR").asUInt()
   mod_data_mem.io.dinb := mod_ctrl.io.out("MEM_DATA_DIN").asUInt()
@@ -77,7 +78,7 @@ class ERVP02 extends MultiIOModule {
   mod_ctrl.io.inp("MEM_DATA_DOUT") := mod_data_mem.io.doutb
 
   // CPU
-  val mod_cpu = Module(new Cpu())
+  val mod_cpu = Module(new Cpu(log2Ceil(MEM_INSTR_SIZE), log2Ceil(MEM_DATA_SIZE)))
   mod_instr_mem.io.addra := mod_cpu.mem_instr.addr
   mod_instr_mem.io.dina := mod_cpu.mem_instr.dout
   mod_instr_mem.io.wea := mod_cpu.mem_instr.we

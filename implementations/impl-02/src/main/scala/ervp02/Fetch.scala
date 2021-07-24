@@ -5,11 +5,11 @@ package ervp02
 
 import chisel3._
 
-class Fetch extends Module {
+class Fetch(val instr_addr_w : Int) extends Module {
   val io = IO(new Bundle {
     val pc = Input(UInt(32.W))
 
-    val mem_instr = new MemoryInterface(32, 10)
+    val mem_instr = new MemoryInterface(32, instr_addr_w)
 
     val instr_raw = Output(UInt(32.W))
   })
