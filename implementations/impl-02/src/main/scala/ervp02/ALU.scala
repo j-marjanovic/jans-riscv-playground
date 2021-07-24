@@ -24,8 +24,9 @@ class ALU extends Module {
     val dout = Output(UInt(32.W))
   })
 
-  val op1 = WireInit(io.reg_din1)
-  val op2 = Mux(io.enable_op_alu_imm, io.decoder_itype.imm, io.reg_din2)
+  val op1: UInt = WireInit(io.reg_din1)
+  val itype_imm_ext: SInt = WireInit(SInt(32.W), io.decoder_itype.imm.asSInt() )
+  val op2: UInt = Mux(io.enable_op_alu_imm, itype_imm_ext.asUInt(), io.reg_din2)
 
   val alu_out = Reg(UInt(32.W))
 
