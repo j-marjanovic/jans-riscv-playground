@@ -42,7 +42,7 @@ class SocTest(c: ERVP02) extends BfmTester(c) with AxiLiteHelper {
   val mod_axi_mngr: AxiLiteMaster = BfmFactory.create_axilite_master(c.ctrl)
 
   // parse ELF
-  val mem_secs = ElfParser.parse("../../software/cpu_test2")
+  val mem_secs = ElfParser.parse("../../software/hello_world")
   for (mem_sec <- mem_secs) {
     println(mem_sec.toString)
   }
@@ -56,18 +56,19 @@ class SocTest(c: ERVP02) extends BfmTester(c) with AxiLiteHelper {
   // load ELF into mem
   val mem_instr = mem_secs.head
   assert(mem_instr.ph_entry.p_offset == 0)
-  assert(mem_instr.ph_entry.p_flags == 0x5) // Read, Execute
+  assert((mem_instr.ph_entry.p_flags.toInt & 0x5) == 0x5) // Read, Execute
 
-  for ((instr, i) <- mem_instr.mem.grouped(4).zipWithIndex) {
+  val NR_INSTR_TO_LOAD = 200
+  val NR_INSTR_TO_EXEC = 5
+  for ((instr, i) <- mem_instr.mem.grouped(4).take(NR_INSTR_TO_LOAD).zipWithIndex) {
     val mem_word = instr.foldRight(0) { (a: Byte, b: Int) => (b << 8) | (a & 0xff) }
-    println(f"mem data = ${mem_word}%08x")
+    println(f"mem addr = ${i * 4}%08x, data = ${mem_word}%08x")
     write_blocking(0x1000 + 4 * i, mem_word)
   }
 
   write_blocking(0x14, 1)
 
-  step(100)
+  step(NR_INSTR_TO_EXEC * 7)
 
-  val mem_out = read_blocking(0x2000)
-  expect(mem_out == 2, "data memory")
+  // TODO: check
 }

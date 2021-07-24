@@ -72,6 +72,7 @@ class Cpu extends MultiIOModule {
 
   // reg file
   mod_reg_file.io.act := state === State.sRegRead
+  mod_reg_file.io.dbg_print := state === State.sStore
   mod_reg_file.io.rs1 := mod_decoder.io.decoder_rtype.rs1
   mod_reg_file.io.rs2 := mod_decoder.io.decoder_rtype.rs2
   mod_reg_file.io.rd := mod_decoder.io.decoder_rtype.rd

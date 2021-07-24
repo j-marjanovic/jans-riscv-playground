@@ -4,6 +4,7 @@
 package ervp02
 
 import chisel3._
+import chisel3.util._
 
 class Decoder extends Module {
   val io = IO(new Bundle {
@@ -41,13 +42,50 @@ class Decoder extends Module {
   }
 
   when(RegNext(io.act)) {
-    // TODO: change output based on the instr
-    printf(
-      "[Decoder] rtype: rs1 = %d, rs2 = %d, rd = %d\n",
-      io.decoder_rtype.rs1,
-      io.decoder_rtype.rs2,
-      io.decoder_rtype.rd
-    )
+    when(io.enable_op_auipc) {
+      printf("[Decoder] AUIPC, rd = %d, imm = 0x%x\n", io.decoder_utype.rd, io.decoder_utype.imm20)
+    }
+    when(io.enable_op_alu) {
+      printf(
+        "[Decoder] ALU, rd = %d, funct3 = %d, rs1 = %d, rs2 = %d, funct7 = %d",
+        io.decoder_rtype.rd,
+        io.decoder_rtype.funct3,
+        io.decoder_rtype.rs1,
+        io.decoder_rtype.rs2,
+        io.decoder_rtype.funct7
+      )
+    }
+    when(io.enable_op_alu_imm) {
+      printf(
+        "[Decoder] ALU IMM, rd = %d, funct3 = %d, rs1 = %d, imm = 0x%x (%d)\n",
+        io.decoder_itype.rd,
+        io.decoder_itype.funct3,
+        io.decoder_itype.rs1,
+        io.decoder_itype.imm.asSInt(),
+        io.decoder_itype.imm.asSInt()
+      )
+      when(io.enable_op_store) {
+        printf(
+          "[Decoder] STORE, funct3 = %d, rs1 = %d, rs2 = %d, imm = 0x%x\n",
+          io.decoder_stype.funct3,
+          io.decoder_stype.rs1,
+          io.decoder_stype.rs2,
+          Cat(io.decoder_stype.imm11_5, io.decoder_stype.imm4_0)
+        )
+      }
+    }
+    when (io.enable_op_load) {
+      printf("[Decoder] LOAD") // TODO
+    }
+    when (io.enable_op_branch) {
+      printf("[Decoder] BRANCH") // TODO
+    }
+    when (io.enable_op_lui) {
+      printf("[Decoder] LUI") // TODO
+    }
+    when (io.enable_op_jal) {
+      printf("[Decoder] JAL") // TODO
+    }
   }
 
   io.decoder_rtype := RegNext(io.instr_raw.asTypeOf(new InstrRtype))
