@@ -15,10 +15,10 @@ class MemDummy(val peek: Bits => BigInt) {
   val mem_txs = mutable.ListBuffer[MemTx]()
 
   def check_data(c: Cpu): Unit = {
-    val we = peek(c.mem_data.we)
+    val we = peek(c.mem_if.we)
     if (we == 1) {
-      val addr = peek(c.mem_data.addr)
-      val data = peek(c.mem_data.dout)
+      val addr = peek(c.mem_if.addr)
+      val data = peek(c.mem_if.dout)
       println(f"mem write, addr = 0x${addr}%x, data = 0x${data}%x")
       mem_txs += new MemTx(addr, data)
     }
@@ -34,10 +34,7 @@ abstract class CpuTestGeneric(c: Cpu) extends PeekPokeTester(c) {
 
   private def wait_for_next_pc(callback: () => Unit = () => {}): Unit = {
     var timeout = 100
-    var pc = peek(c.mem_instr.addr)
-    val pc_prev = pc
-    while (pc == pc_prev) {
-      pc = peek(c.mem_instr.addr)
+    while (peek(c.dbg_instr_done) == 0) {
       callback()
       step(1)
       if (timeout == 0) {
@@ -69,14 +66,15 @@ abstract class CpuTestGeneric(c: Cpu) extends PeekPokeTester(c) {
     println(f"Last instr addr = 0x${last_addr}%x")
 
     while (true) {
-      val addr = peek(c.mem_instr.addr).toInt * 4
+      val addr = peek(c.mem_if.addr).toInt * 4
       if (addr > last_addr) {
         println("Last instr, exiting")
         return
       }
+      println(f"addr = ${addr}%x")
       val instr = instr_mem(addr)
       println(s"Executing ${instr._2}")
-      poke(c.mem_instr.din, instr._1)
+      poke(c.mem_if.din, instr._1)
       wait_for_next_pc(() => mem_dummy.check_data(c))
     }
   }

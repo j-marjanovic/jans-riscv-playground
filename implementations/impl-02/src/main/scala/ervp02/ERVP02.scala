@@ -16,8 +16,7 @@ class Uart extends Bundle {
 class ERVP02 extends MultiIOModule {
   import AxiLiteSubordinateGenerator._
 
-  val MEM_INSTR_SIZE: Int = 0x10000
-  val MEM_DATA_SIZE: Int = 0x1000
+  val MEM_SIZE: Int = 0x20000
 
   // format: off
   val area_map = new AreaMap(
@@ -38,14 +37,13 @@ class ERVP02 extends MultiIOModule {
     new Reg("CONTROL", 0x14,
       new Field("ENABLE", hw_access = Access.R,  sw_access = Access.RW, hi = 0, lo = None)
     ),
-    new Mem("INSTR", addr = 0x1000, nr_els = MEM_INSTR_SIZE, data_w = 32),
-    new Mem("DATA", addr = 0x1000 + MEM_INSTR_SIZE, nr_els = MEM_DATA_SIZE, data_w = 32),
+    new Mem("MEM", addr = 0x1000, nr_els = MEM_SIZE, data_w = 32),
   )
   // format: on
 
   private val mem_start_addr =
-    area_map.els.find(_.name == "DATA").get.asInstanceOf[Mem].addr
-  private val addr_w = log2Up(mem_start_addr + MEM_INSTR_SIZE * 4)
+    area_map.els.find(_.name == "MEM").get.asInstanceOf[Mem].addr
+  private val addr_w = log2Up(mem_start_addr + MEM_SIZE * 4)
 
   // IO
   val uart = IO(new Uart())
@@ -61,33 +59,20 @@ class ERVP02 extends MultiIOModule {
 
   mod_ctrl.io.inp("STATUS_RUNNING") := false.B // TODO:
 
-  // instr memory
-  val mod_instr_mem = Module(new DualPortRam(32, MEM_INSTR_SIZE))
-  mod_instr_mem.io.clk := this.clock
-  mod_instr_mem.io.addrb := mod_ctrl.io.out("MEM_INSTR_ADDR").asUInt()
-  mod_instr_mem.io.dinb := mod_ctrl.io.out("MEM_INSTR_DIN").asUInt()
-  mod_instr_mem.io.web := mod_ctrl.io.out("MEM_INSTR_WE").asUInt().asBool()
-  mod_ctrl.io.inp("MEM_INSTR_DOUT") := mod_instr_mem.io.doutb
-
-  // data memory
-  val mod_data_mem = Module(new DualPortRam(32, MEM_DATA_SIZE))
-  mod_data_mem.io.clk := this.clock
-  mod_data_mem.io.addrb := mod_ctrl.io.out("MEM_DATA_ADDR").asUInt()
-  mod_data_mem.io.dinb := mod_ctrl.io.out("MEM_DATA_DIN").asUInt()
-  mod_data_mem.io.web := mod_ctrl.io.out("MEM_DATA_WE").asUInt().asBool()
-  mod_ctrl.io.inp("MEM_DATA_DOUT") := mod_data_mem.io.doutb
+  // memory
+  val mod_mem = Module(new DualPortRam(32, MEM_SIZE))
+  mod_mem.io.clk := this.clock
+  mod_mem.io.addrb := mod_ctrl.io.out("MEM_MEM_ADDR").asUInt()
+  mod_mem.io.dinb := mod_ctrl.io.out("MEM_MEM_DIN").asUInt()
+  mod_mem.io.web := mod_ctrl.io.out("MEM_MEM_WE").asUInt().asBool()
+  mod_ctrl.io.inp("MEM_MEM_DOUT") := mod_mem.io.doutb
 
   // CPU
-  val mod_cpu = Module(new Cpu(log2Ceil(MEM_INSTR_SIZE), log2Ceil(MEM_DATA_SIZE)))
-  mod_instr_mem.io.addra := mod_cpu.mem_instr.addr
-  mod_instr_mem.io.dina := mod_cpu.mem_instr.dout
-  mod_instr_mem.io.wea := mod_cpu.mem_instr.we
-  mod_cpu.mem_instr.din := mod_instr_mem.io.douta
-
-  mod_data_mem.io.addra := mod_cpu.mem_data.addr
-  mod_data_mem.io.dina := mod_cpu.mem_data.dout
-  mod_data_mem.io.wea := mod_cpu.mem_data.we
-  mod_cpu.mem_data.din := mod_data_mem.io.douta
+  val mod_cpu = Module(new Cpu(log2Ceil(MEM_SIZE)))
+  mod_mem.io.addra := mod_cpu.mem_if.addr
+  mod_mem.io.dina := mod_cpu.mem_if.dout
+  mod_mem.io.wea := mod_cpu.mem_if.we
+  mod_cpu.mem_if.din := mod_mem.io.douta
 
   mod_cpu.enable := mod_ctrl.io.out("CONTROL_ENABLE")
 

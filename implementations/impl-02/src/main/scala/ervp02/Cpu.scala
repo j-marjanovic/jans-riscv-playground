@@ -7,22 +7,20 @@ import chisel3._
 import chisel3.util._
 import chisel3.experimental.ChiselEnum
 
-class Cpu(val instr_addr_w : Int, val data_addr_w : Int) extends MultiIOModule {
+class Cpu(val mem_addr_w : Int) extends MultiIOModule {
   val XLEN: Int = 32
 
   // IO
-  val mem_instr = IO(new MemoryInterface(32, instr_addr_w))
-  mem_instr.dout := 0.U
-  mem_instr.we := false.B
-  val mem_data = IO(new MemoryInterface(32, data_addr_w))
+  val mem_if = IO(new MemoryInterface(32, mem_addr_w))
   val enable = IO(Input(Bool()))
+  val dbg_instr_done = IO(Output(Bool()))
 
   // modules
-  val mod_fetch = Module(new Fetch(instr_addr_w))
+  val mod_fetch = Module(new Fetch(mem_addr_w))
   val mod_decoder = Module(new Decoder())
   val mod_reg_file = Module(new RegFile())
   val mod_alu = Module(new ALU())
-  val mod_store_load = Module(new StoreLoad())
+  val mod_store_load = Module(new StoreLoad(mem_addr_w))
   val mod_branch = Module(new Branch())
   val mod_jump = Module(new Jump())
   val mod_pc = Module(new PC())
@@ -33,6 +31,7 @@ class Cpu(val instr_addr_w : Int, val data_addr_w : Int) extends MultiIOModule {
   }
 
   val state = RegInit(State.sFetch)
+  dbg_instr_done := state === State.sStore
 
   switch(state) {
     is(State.sFetch) {
@@ -62,9 +61,9 @@ class Cpu(val instr_addr_w : Int, val data_addr_w : Int) extends MultiIOModule {
   }
 
   // fetch
+  mod_fetch.io.act := state === State.sFetch
   mod_fetch.io.pc := mod_pc.io.pc
-  mem_instr.addr := mod_fetch.io.mem_instr.addr / 4.U
-  mod_fetch.io.mem_instr.din := mem_instr.din
+  mod_fetch.io.mem_instr.din := mem_if.din
 
   // decode
   mod_decoder.io.act := state === State.sDecode
@@ -104,7 +103,7 @@ class Cpu(val instr_addr_w : Int, val data_addr_w : Int) extends MultiIOModule {
   mod_store_load.io.enable_op_load := mod_decoder.io.enable_op_load
   mod_store_load.io.addr := mod_alu.io.dout
   mod_store_load.io.din := mod_reg_file.io.dout2
-  mod_store_load.io.mem_data <> mem_data
+  mod_store_load.io.mem_data.din := mem_if.din
 
   mod_reg_file.io.din := Mux(
     mod_decoder.io.enable_op_alu || mod_decoder.io.enable_op_alu_imm || mod_decoder.io.enable_op_lui,
@@ -151,4 +150,15 @@ class Cpu(val instr_addr_w : Int, val data_addr_w : Int) extends MultiIOModule {
 
   mod_pc.io.load := state === State.sStore && (mod_decoder.io.enable_op_jal || mod_decoder.io.enable_op_jalr)
   mod_pc.io.load_pc := mod_alu.io.dout
+
+  // mem connection
+  when (state === State.sFetch) {
+    mem_if.addr := mod_fetch.io.mem_instr.addr / 4.U
+    mem_if.dout := 0.U
+    mem_if.we := false.B
+  } .otherwise {
+    mem_if.addr := mod_store_load.io.mem_data.addr / 4.U
+    mem_if.dout := mod_store_load.io.mem_data.dout
+    mem_if.we := mod_store_load.io.mem_data.we
+  }
 }
