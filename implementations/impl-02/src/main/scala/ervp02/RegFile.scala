@@ -5,7 +5,7 @@ package ervp02
 
 import chisel3._
 
-class RegFile extends Module {
+class RegFile(val sp_init: Int) extends Module {
   val io = IO(new Bundle {
     val act = Input(Bool())
     val dbg_print = Input(Bool())
@@ -35,7 +35,7 @@ class RegFile extends Module {
     printf("[RegFile] reg out1 = %x, reg out2 = %x\n", io.dout1, io.dout2);
   }
 
-  val mod_mem1 = Module(new DualPortRam(32, 32))
+  val mod_mem1 = Module(new DualPortRam(32, 32, 1, 2, sp_init))
   mod_mem1.io.clk := this.clock
   mod_mem1.io.addra := io.rd
   mod_mem1.io.dina := io.din
@@ -45,7 +45,7 @@ class RegFile extends Module {
   mod_mem1.io.addrb := io.rs1
   io.dout1 := Mux(rs1_prev === 0.U, 0.U, mod_mem1.io.doutb)
 
-  val mod_mem2 = Module(new DualPortRam(32, 32))
+  val mod_mem2 = Module(new DualPortRam(32, 32, 1, 2, sp_init))
   mod_mem2.io.clk := this.clock
   mod_mem2.io.addra := io.rd
   mod_mem2.io.dina := io.din
@@ -56,7 +56,10 @@ class RegFile extends Module {
   io.dout2 := Mux(rs2_prev === 0.U, 0.U, mod_mem2.io.doutb)
 
   // debug
-  val debug_reg_file = RegInit(VecInit(Seq.fill(32)(0.U(32.W))))
+  val debug_reg_file = RegInit(
+    VecInit.tabulate(32)(i => if (i == 2) sp_init.U(32.W) else 0.U(32.W))
+  )
+
   when(io.we && io.rd =/= 0.U) {
     debug_reg_file(io.rd) := io.din
   }

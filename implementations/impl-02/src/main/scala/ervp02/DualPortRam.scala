@@ -6,9 +6,20 @@ package ervp02
 import chisel3._
 import chisel3.util._
 
-class DualPortRam(val RAM_WIDTH: Int, val RAM_DEPTH: Int)
-    extends BlackBox(
-      Map("RAM_WIDTH" -> RAM_WIDTH, "RAM_DEPTH" -> RAM_DEPTH)
+class DualPortRam(
+    val RAM_WIDTH: Int,
+    val RAM_DEPTH: Int,
+    val MEM_INIT_EN0: Int = 0,
+    val MEM_INIT_ADDR0: Int = 0,
+    val MEM_INIT_DATA0: Int = 0
+) extends BlackBox(
+      Map(
+        "RAM_WIDTH" -> RAM_WIDTH,
+        "RAM_DEPTH" -> RAM_DEPTH,
+        "MEM_INIT_EN0" -> MEM_INIT_EN0,
+        "MEM_INIT_ADDR0" -> MEM_INIT_ADDR0,
+        "MEM_INIT_DATA0" -> MEM_INIT_DATA0
+      )
     )
     with HasBlackBoxResource {
 
@@ -24,6 +35,6 @@ class DualPortRam(val RAM_WIDTH: Int, val RAM_DEPTH: Int)
     val web = Input(Bool())
   })
 
-  addResource("/DualPortRam.v")
+  addResource("/DualPortRam.sv")
 
 }

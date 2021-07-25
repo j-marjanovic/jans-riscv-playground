@@ -22,7 +22,10 @@ SOFTWARE.
 
 module DualPortRam #(
     parameter RAM_WIDTH = 64,
-    parameter RAM_DEPTH = 512
+    parameter RAM_DEPTH = 512,
+    parameter bit MEM_INIT_EN0 = 1'b0,
+    parameter int MEM_INIT_ADDR0 = 0,
+    parameter int MEM_INIT_DATA0 = 0
 ) (
     input                                clk,
     input      [$clog2(RAM_DEPTH-1)-1:0] addra,
@@ -38,6 +41,11 @@ module DualPortRam #(
 
   reg [RAM_WIDTH-1:0] BRAM[RAM_DEPTH-1:0];
 
+  initial begin: proc_init
+    if (MEM_INIT_EN0) begin
+      BRAM[MEM_INIT_ADDR0] = MEM_INIT_DATA0;
+    end
+  end
 
   always @(posedge clk) begin : proc_porta
     if (wea) begin

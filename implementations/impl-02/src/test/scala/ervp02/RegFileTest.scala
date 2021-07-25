@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.iotesters.SteppedHWIOTester
 
 class RegFileTest extends SteppedHWIOTester {
-  override val device_under_test = Module(new RegFile())
+  override val device_under_test = Module(new RegFile(0))
 
   for (i <- 0 until 31) {
     poke(device_under_test.io.rd, i)

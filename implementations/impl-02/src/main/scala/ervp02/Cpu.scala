@@ -15,10 +15,13 @@ class Cpu(val mem_addr_w : Int) extends MultiIOModule {
   val enable = IO(Input(Bool()))
   val dbg_instr_done = IO(Output(Bool()))
 
+  // TODO
+  val SP_INIT = 0x407ffff0
+
   // modules
   val mod_fetch = Module(new Fetch(mem_addr_w))
   val mod_decoder = Module(new Decoder())
-  val mod_reg_file = Module(new RegFile())
+  val mod_reg_file = Module(new RegFile(SP_INIT))
   val mod_alu = Module(new ALU())
   val mod_store_load = Module(new StoreLoad(mem_addr_w))
   val mod_branch = Module(new Branch())
