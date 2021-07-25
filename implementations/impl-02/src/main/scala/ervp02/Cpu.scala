@@ -101,6 +101,7 @@ class Cpu(val mem_addr_w : Int) extends MultiIOModule {
   mod_alu.io.enable_op_jalr := mod_decoder.io.enable_op_jalr
 
   // store/load
+  mod_store_load.io.decoder_itype := mod_decoder.io.decoder_itype
   mod_store_load.io.act := state === State.sExec2
   mod_store_load.io.enable_op_store := mod_decoder.io.enable_op_store
   mod_store_load.io.enable_op_load := mod_decoder.io.enable_op_load

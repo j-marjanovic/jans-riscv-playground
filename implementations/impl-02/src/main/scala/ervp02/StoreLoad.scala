@@ -4,10 +4,11 @@
 package ervp02
 
 import chisel3._
+import chisel3.util._
 
-class StoreLoad(val mem_addr_w : Int) extends Module {
+class StoreLoad(val mem_addr_w: Int) extends Module {
   val io = IO(new Bundle {
-    //val decoder_itype = Input(new InstrItype())
+    val decoder_itype = Input(new InstrItype())
     //val decoder_stype = Input(new InstrStype())
 
     val act = Input(Bool())
@@ -23,14 +24,37 @@ class StoreLoad(val mem_addr_w : Int) extends Module {
     val mem_data = new MemoryInterface(32, mem_addr_w)
   })
 
-  when (io.act) {
+  when(io.act) {
     printf("[StoreLoad] addr = %x, data = %x\n", io.addr, io.din);
   }
 
   io.mem_data.addr := io.addr
   io.mem_data.dout := io.din
   io.mem_data.we := io.enable_op_store && io.act
-  io.dout := io.mem_data.din
+
+  when(io.enable_op_load) {
+    io.dout := DontCare
+
+    switch(io.decoder_itype.funct3) {
+      is(0.U) {
+        io.dout := io.mem_data.din(7, 0).asSInt().asUInt()
+      }
+      is(1.U) {
+        io.dout := io.mem_data.din(15, 0).asSInt().asUInt()
+      }
+      is(2.U) {
+        io.dout := io.mem_data.din
+      }
+      is(4.U) {
+        io.dout := io.mem_data.din(7, 0)
+      }
+      is(5.U) {
+        io.dout := io.mem_data.din(15, 0)
+      }
+    }
+  }.otherwise {
+    io.dout := io.mem_data.din
+  }
 
   io.valid := RegNext((io.enable_op_load || io.enable_op_store) && io.act)
 

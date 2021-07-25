@@ -23,6 +23,10 @@ class ERVP02test extends ChiselFlatSpec {
     assertTesterPasses(new BranchTest())
   }
 
+  it should "check the store/load module" in {
+    assertTesterPasses(new StoreLoadTest())
+  }
+
   it should "check the CPU ALU" in {
     Driver.execute(
       Array(
