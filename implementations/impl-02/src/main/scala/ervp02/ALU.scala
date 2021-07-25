@@ -26,25 +26,28 @@ class ALU extends Module {
     val dout = Output(UInt(32.W))
   })
 
-  val op1: UInt = WireInit(io.reg_din1)
+  val op1: SInt = WireInit(io.reg_din1).asSInt()
   val itype_imm_ext: SInt = WireInit(SInt(32.W), io.decoder_itype.imm.asSInt())
-  val op2: UInt =
-    Mux(io.enable_op_alu_imm || io.enable_op_jalr, itype_imm_ext.asUInt(), io.reg_din2)
+  val op2: SInt =
+    Mux(io.enable_op_alu_imm || io.enable_op_jalr, itype_imm_ext, io.reg_din2.asSInt())
 
-  val alu_out = Reg(UInt(32.W))
+  val alu_out: SInt = Reg(SInt(32.W))
 
   val store_imm: SInt =
     WireInit(SInt(32.W), Cat(io.decoder_stype.imm11_5, io.decoder_stype.imm4_0).asSInt())
-  val store_out = RegNext(op1 + store_imm.asUInt())
+  val store_out: SInt = RegNext(op1 + store_imm)
 
   val load_imm: SInt = WireInit(SInt(32.W), io.decoder_itype.imm.asSInt())
-  val load_out = RegNext(op1 + load_imm.asUInt())
+  val load_out: SInt = RegNext(op1 + load_imm)
 
   io.dout := Mux(
     io.enable_op_lui,
     (io.decoder_utype.imm20 << 12).asUInt(),
-    Mux(io.enable_op_store, store_out,
-      Mux(io.enable_op_load, load_out, alu_out))
+    Mux(
+      io.enable_op_store,
+      store_out.asUInt(),
+      Mux(io.enable_op_load, load_out.asUInt(), alu_out.asUInt())
+    )
   )
 
   // TODO: check those operations
@@ -62,11 +65,11 @@ class ALU extends Module {
     is(1.U) {
       alu_out := op1 << op2(4, 0)
     }
-    is(2.U) {
-      alu_out := op1.asSInt() < op1.asSInt()
+    is(2.U) { // SLT
+      alu_out := (op1 < op2).asSInt()
     }
-    is(3.U) {
-      alu_out := op1 < op2
+    is(3.U) { // SLTU
+      alu_out := (op1.asUInt() < op2.asUInt()).asSInt()
     }
     is(4.U) {
       alu_out := op1 ^ op2

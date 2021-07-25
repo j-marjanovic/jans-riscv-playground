@@ -98,4 +98,16 @@ class ALUTest extends SteppedHWIOTester {
   poke(device_under_test.io.enable_op_store, 1)
   step(1)
   expect(device_under_test.io.dout, 0xFFE)
+
+  step(1)
+
+  // 0xfff00313 - ADDI, rd = 6, funct3 = 0, rs1 = 0, imm = 0xfff (-1)
+  poke(device_under_test.io.decoder_itype, 0xfff00313L)
+  poke(device_under_test.io.reg_din1, 0)
+  poke(device_under_test.io.reg_din2, 0)
+  poke(device_under_test.io.enable_op_alu, 0)
+  poke(device_under_test.io.enable_op_alu_imm, 1)
+  poke(device_under_test.io.enable_op_store, 0)
+  step(1)
+  expect(device_under_test.io.dout, 0xffffffffL)
 }
