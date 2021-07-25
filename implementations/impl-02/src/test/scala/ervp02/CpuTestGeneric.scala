@@ -17,7 +17,7 @@ class MemDummy(val peek: Bits => BigInt) {
   def check_data(c: Cpu): Unit = {
     val we = peek(c.mem_if.we)
     if (we == 1) {
-      val addr = peek(c.mem_if.addr)
+      val addr = peek(c.mem_if.addr) * 4
       val data = peek(c.mem_if.dout)
       println(f"mem write, addr = 0x${addr}%x, data = 0x${data}%x")
       mem_txs += new MemTx(addr, data)
@@ -42,6 +42,8 @@ abstract class CpuTestGeneric(c: Cpu) extends PeekPokeTester(c) {
       }
       timeout -= 1
     }
+    callback()
+    step(1)
   }
 
   val instr_mem = mutable.Map[Int, (BigInt, String)]()
@@ -62,7 +64,7 @@ abstract class CpuTestGeneric(c: Cpu) extends PeekPokeTester(c) {
   }
 
   private def exec_cmds(): Unit = {
-    val last_addr = instr_mem.keys.toList.sorted.last
+    val last_addr = instr_mem.keys.toList.max
     println(f"Last instr addr = 0x${last_addr}%x")
 
     while (true) {
@@ -72,7 +74,7 @@ abstract class CpuTestGeneric(c: Cpu) extends PeekPokeTester(c) {
         return
       }
       println(f"addr = ${addr}%x")
-      val instr = instr_mem(addr)
+      val instr: (BigInt, String) = instr_mem(addr)
       println(s"Executing ${instr._2}")
       poke(c.mem_if.din, instr._1)
       wait_for_next_pc(() => mem_dummy.check_data(c))

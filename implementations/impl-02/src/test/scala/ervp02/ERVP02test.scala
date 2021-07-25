@@ -23,7 +23,7 @@ class ERVP02test extends ChiselFlatSpec {
     assertTesterPasses(new BranchTest())
   }
 
-  ignore should "check the CPU ALU" in {
+  it should "check the CPU ALU" in {
     Driver.execute(
       Array(
         "--backend-name",
@@ -42,7 +42,7 @@ class ERVP02test extends ChiselFlatSpec {
     } should be(true)
   }
 
-  ignore should "check the CPU branching" in {
+  it should "check the CPU branching" in {
     Driver.execute(
       Array(
         "--backend-name",
