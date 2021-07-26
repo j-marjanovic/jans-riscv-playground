@@ -5,7 +5,7 @@ OBJDUMP=riscv32-unknown-elf-objdump
 all: hello_world cpu_test1 cpu_test2
 
 hello_world: hello_world.c
-	$(CC) -o $@ -Wall -Wextra -pedantic  $<
+	$(CC) -o $@ -Wall -Wextra -pedantic -Tlink2.ld -Os  $<
  
 cpu_test1: cpu_test1.S
 	$(CC) -nostdlib -nostartfiles -Tlink.ld -o cpu_test1 cpu_test1.S
