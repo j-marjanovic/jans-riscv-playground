@@ -6,7 +6,7 @@ package ervp02
 import chisel3._
 import chisel3.util._
 
-class StoreLoad(val mem_addr_w: Int) extends Module {
+class StoreLoad extends Module {
   val io = IO(new Bundle {
     val decoder_itype = Input(new InstrItype())
     //val decoder_stype = Input(new InstrStype())
@@ -21,7 +21,7 @@ class StoreLoad(val mem_addr_w: Int) extends Module {
     val dout = Output(UInt(32.W))
     val valid = Output(Bool())
 
-    val mem_data = new MemoryInterface(32, mem_addr_w)
+    val mem_data = new MemoryInterface(32, 32)
   })
 
   when(io.act) {

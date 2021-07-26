@@ -5,6 +5,7 @@ package ervp02.pc8250
 
 import chisel3._
 import chisel3.util._
+import ervp02.MemoryInterface
 
 class RBR extends Bundle {
   val data = UInt(8.W)
@@ -78,7 +79,7 @@ class DL extends Bundle {
 }
 
 class Registers(val DL_INIT: Int) extends MultiIOModule {
-  val mem = IO(new MemoryInterface)
+  val mem = IO(Flipped(new MemoryInterface(8, 3)))
 
   // 0
   val RBR = IO(Input(Valid(new RBR)))
@@ -128,34 +129,34 @@ class Registers(val DL_INIT: Int) extends MultiIOModule {
     switch(mem.addr) {
       is(0.U) {
         when(reg_LCR.DLAB) {
-          reg_DL.L := mem.din
+          reg_DL.L := mem.dout
         }.otherwise {
-          reg_THR.bits := mem.din.asTypeOf(new THR)
+          reg_THR.bits := mem.dout.asTypeOf(new THR)
           reg_THR.valid := true.B
         }
       }
       is(1.U) {
         when(reg_LCR.DLAB) {
-          reg_DL.H := mem.din
+          reg_DL.H := mem.dout
         }
       }
       is(3.U) {
-        reg_LCR := mem.din.asTypeOf(new LCR)
+        reg_LCR := mem.dout.asTypeOf(new LCR)
       }
       is(4.U) {
-        reg_MCR := mem.din.asTypeOf(new MCR)
+        reg_MCR := mem.dout.asTypeOf(new MCR)
       }
       // 5: read only
       // 6: read only
       is(7.U) {
-        reg_SCR := mem.din.asTypeOf(new SCR)
+        reg_SCR := mem.dout.asTypeOf(new SCR)
       }
     }
   }
 
   // read logic
   val dout_reg = Reg(UInt(8.W))
-  mem.dout := dout_reg
+  mem.din := dout_reg
 
   switch(mem.addr) {
     is(0.U) {

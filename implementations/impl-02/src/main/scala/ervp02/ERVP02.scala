@@ -7,11 +7,7 @@ import chisel3._
 import bfmtester.util._
 import bfmtester.AxiLiteIf
 import chisel3.util.{log2Ceil, log2Up}
-
-class Uart extends Bundle {
-  val tx = Output(Bool())
-  val rx = Input(Bool())
-}
+import ervp02.pc8250.{PC8250, UartInterface}
 
 class ERVP02 extends MultiIOModule {
   import AxiLiteSubordinateGenerator._
@@ -46,7 +42,7 @@ class ERVP02 extends MultiIOModule {
   private val addr_w = log2Up(mem_start_addr + MEM_SIZE * 4)
 
   // IO
-  val uart = IO(new Uart())
+  val uart = IO(new UartInterface())
   val led = IO(Output(Bool()))
   val ctrl = IO(new AxiLiteIf(addr_w = addr_w.W))
 
@@ -54,7 +50,7 @@ class ERVP02 extends MultiIOModule {
   ctrl <> mod_ctrl.io.ctrl
 
   mod_ctrl.io.inp("VERSION_MAJOR") := 0x00.U
-  mod_ctrl.io.inp("VERSION_MINOR") := 0x02.U
+  mod_ctrl.io.inp("VERSION_MINOR") := 0x03.U
   mod_ctrl.io.inp("VERSION_PATCH") := 0x00.U
 
   // memory
@@ -71,13 +67,23 @@ class ERVP02 extends MultiIOModule {
   mod_mem.io.dina := mod_cpu.mem_if.dout
   mod_mem.io.wea := mod_cpu.mem_if.we
   mod_mem.io.byte_ena := mod_cpu.mem_if.byte_en
-  mod_cpu.mem_if.din := mod_mem.io.douta
 
   mod_cpu.enable_pulse := mod_ctrl.io.out("CONTROL_ENABLE")
   mod_ctrl.io.inp("STATUS_RUNNING") := mod_cpu.running_out
 
   // UART
-  uart.tx := uart.rx
+  val mod_uart = Module(new PC8250())
+  mod_uart.io.ext <> uart
+  mod_uart.io.mem.addr := mod_cpu.mem_if.addr
+  mod_uart.io.mem.dout := mod_cpu.mem_if.dout
+  mod_uart.io.mem.we := (mod_cpu.mem_if.addr(31, 24) === 0xB0.U) && mod_cpu.mem_if.we
+  mod_uart.io.mem.byte_en := false.B
+
+  when (mod_cpu.mem_if.addr(31, 24) === 0xB0.U) {
+    mod_cpu.mem_if.din := mod_uart.io.mem.din
+  } .otherwise {
+    mod_cpu.mem_if.din := mod_mem.io.douta
+  }
 
   // LED
   val led_cntr = Reg(UInt(27.W))

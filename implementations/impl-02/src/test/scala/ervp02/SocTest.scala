@@ -92,7 +92,6 @@ class SocTest(c: ERVP02) extends BfmTester(c) with AxiLiteHelper {
       val data = read_blocking(0x1000 + addr).toLong
       for (bs <- 0 until 32 by 8) {
         val c : Char = ((data >> bs) & 0xFF).toChar
-        println(s"c = ${c}")
         if (c == 0) {
           break
         }

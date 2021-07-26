@@ -30,7 +30,7 @@ class CpuTestBranch(c: Cpu) extends CpuTestGeneric(c) {
 
   override def final_check(): Unit = {
     val mem_txs = mem_dummy.mem_txs.toList
-    expect(mem_txs.head.addr == 0, "mem addr 0")
+    expect(mem_txs.head.addr == 0x2000, "mem addr 0")
     expect(mem_txs.head.data == 0x2, "mem data 0")
   }
 

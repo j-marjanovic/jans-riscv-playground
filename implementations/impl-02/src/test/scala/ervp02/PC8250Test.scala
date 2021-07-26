@@ -10,7 +10,7 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class IntBusBfm(
-    val iface: pc8250.MemoryInterface,
+    val iface: MemoryInterface,
     val peek: Bits => BigInt,
     val poke: (Bits, BigInt) => Unit,
     val println: String => Unit
@@ -29,13 +29,13 @@ class IntBusBfm(
 
   override def update(t: Long, poke: (Bits, BigInt) => Unit): Unit = {
     prev_read = false
-    poke(iface.din, 0)
+    poke(iface.dout, 0)
     poke(iface.addr, 0)
     poke(iface.we, 0)
 
     if (cmds.nonEmpty) {
       val cmd = cmds.dequeue()
-      poke(iface.din, cmd.data)
+      poke(iface.dout, cmd.data)
       poke(iface.addr, cmd.addr)
       poke(iface.we, if (cmd.wr) 1 else 0)
       prev_read = !cmd.wr
@@ -48,7 +48,7 @@ class IntBusBfm(
 
     if (prev_read) {
       prev_read = false
-      val data = peek(iface.dout).toLong
+      val data = peek(iface.din).toLong
       printWithBg(f"${t}%5d IntBusBfm: read: data = 0x${data}%x")
       resp += data
     }

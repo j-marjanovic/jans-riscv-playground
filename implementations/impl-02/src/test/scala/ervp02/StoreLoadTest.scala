@@ -4,7 +4,7 @@ import chisel3._
 import chisel3.iotesters.SteppedHWIOTester
 
 class StoreLoadTest extends SteppedHWIOTester{
-  override val device_under_test = Module(new StoreLoad(10))
+  override val device_under_test = Module(new StoreLoad)
 
   poke(device_under_test.io.decoder_itype.funct3, 5)
   poke(device_under_test.io.enable_op_load, 1)

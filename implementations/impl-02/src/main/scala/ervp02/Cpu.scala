@@ -11,7 +11,7 @@ class Cpu(val mem_addr_w : Int) extends MultiIOModule {
   val XLEN: Int = 32
 
   // IO
-  val mem_if = IO(new MemoryInterface(32, mem_addr_w))
+  val mem_if = IO(new MemoryInterface(32, 32))
   val enable_pulse = IO(Input(Bool()))
   val running_out = IO(Output(Bool()))
   val dbg_instr_done = IO(Output(Bool()))
@@ -24,7 +24,7 @@ class Cpu(val mem_addr_w : Int) extends MultiIOModule {
   val mod_decoder = Module(new Decoder())
   val mod_reg_file = Module(new RegFile(SP_INIT))
   val mod_alu = Module(new ALU())
-  val mod_store_load = Module(new StoreLoad(mem_addr_w))
+  val mod_store_load = Module(new StoreLoad)
   val mod_branch = Module(new Branch())
   val mod_jump = Module(new Jump())
   val mod_pc = Module(new PC())

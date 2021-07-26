@@ -20,15 +20,15 @@ class CpuTestAlu(c: Cpu) extends CpuTestGeneric(c) {
   override def final_check(): Unit = {
     val mem_txs = mem_dummy.mem_txs.toList
 
-    expect(mem_txs(0).addr == 0x110, "mem addr 0")
+    expect(mem_txs(0).addr == 0x2110, "mem addr 0")
     expect(mem_txs(0).data == 0xd, "mem data 0")
     expect(mem_txs(0).byte_en == 0xf, "mem byte en 0")
 
-    expect(mem_txs(1).addr == 0xff, "mem addr 1")
+    expect(mem_txs(1).addr == 0x20ff, "mem addr 1")
     expect(mem_txs(1).data == 0x1, "mem data 1")
     expect(mem_txs(1).byte_en == 0x1, "mem byte en 1")
 
-    expect(mem_txs(2).addr == 0xfe, "mem addr 2")
+    expect(mem_txs(2).addr == 0x20fe, "mem addr 2")
     expect(mem_txs(2).data == 0x2, "mem data 2")
     expect(mem_txs(2).byte_en == 0x1, "mem byte en 2")
   }
