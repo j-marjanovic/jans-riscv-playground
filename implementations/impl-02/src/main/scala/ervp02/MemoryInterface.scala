@@ -10,4 +10,5 @@ class MemoryInterface(data_w: Int, addr_w: Int) extends Bundle {
   val din = Input(UInt(data_w.W))
   val dout = Output(UInt(data_w.W))
   val we = Output(Bool())
+  val byte_en = Output(UInt((data_w/8).W))
 }

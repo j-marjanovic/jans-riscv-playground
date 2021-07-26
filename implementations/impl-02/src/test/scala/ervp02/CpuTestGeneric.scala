@@ -10,17 +10,18 @@ import scala.collection.mutable
 import scala.util.matching.Regex
 
 class MemDummy(val peek: Bits => BigInt) {
-  class MemTx(val addr: BigInt, val data: BigInt)
+  class MemTx(val addr: BigInt, val data: BigInt, val byte_en : BigInt)
 
   val mem_txs = mutable.ListBuffer[MemTx]()
 
   def check_data(c: Cpu): Unit = {
     val we = peek(c.mem_if.we)
     if (we == 1) {
-      val addr = peek(c.mem_if.addr) * 4
+      val addr = peek(c.mem_if.addr)
       val data = peek(c.mem_if.dout)
-      println(f"mem write, addr = 0x${addr}%x, data = 0x${data}%x")
-      mem_txs += new MemTx(addr, data)
+      val byte_en = peek(c.mem_if.byte_en)
+      println(f"mem write, addr = 0x${addr}%x, data = 0x${data}%x, byte_en = 0x${byte_en}")
+      mem_txs += new MemTx(addr, data, byte_en)
     }
   }
 }
@@ -68,7 +69,7 @@ abstract class CpuTestGeneric(c: Cpu) extends PeekPokeTester(c) {
     println(f"Last instr addr = 0x${last_addr}%x")
 
     while (true) {
-      val addr = peek(c.mem_if.addr).toInt * 4
+      val addr = peek(c.mem_if.addr).toInt
       if (addr > last_addr) {
         println("Last instr, exiting")
         return

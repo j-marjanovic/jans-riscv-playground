@@ -19,6 +19,7 @@ class Fetch(val instr_addr_w : Int) extends Module {
   io.mem_instr.addr := io.pc
   io.mem_instr.we := false.B
   io.mem_instr.dout := DontCare
+  io.mem_instr.byte_en := DontCare
 
   val instr_stored = RegEnable(io.mem_instr.din, 0.U, RegNext(io.act))
 

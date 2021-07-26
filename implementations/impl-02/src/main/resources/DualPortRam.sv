@@ -32,11 +32,13 @@ module DualPortRam #(
     input      [          RAM_WIDTH-1:0] dina,
     output reg [          RAM_WIDTH-1:0] douta,
     input                                wea,
+    input      [        RAM_WIDTH/8-1:0] byte_ena,
 
     input      [$clog2(RAM_DEPTH-1)-1:0] addrb,
     input      [          RAM_WIDTH-1:0] dinb,
     output reg [          RAM_WIDTH-1:0] doutb,
-    input                                web
+    input                                web,
+    input      [        RAM_WIDTH/8-1:0] byte_enb
 );
 
   reg [RAM_WIDTH-1:0] BRAM[RAM_DEPTH-1:0];
@@ -49,7 +51,9 @@ module DualPortRam #(
 
   always @(posedge clk) begin : proc_porta
     if (wea) begin
-      BRAM[addra] <= dina;
+      for (int i = 0; i < RAM_WIDTH/8; i++)
+        if (byte_ena[i])
+          BRAM[addra][i*8 +: 8] <= dina[i*8 +: 8];
     end
 
     douta <= BRAM[addra];
@@ -57,7 +61,9 @@ module DualPortRam #(
 
   always @(posedge clk) begin : proc_portb
     if (web) begin
-      BRAM[addrb] <= dinb;
+      for (int i = 0; i < RAM_WIDTH/8; i++)
+        if (byte_enb[i])
+          BRAM[addrb][i*8 +: 8] <= dinb[i*8 +: 8];
     end
 
     doutb <= BRAM[addrb];

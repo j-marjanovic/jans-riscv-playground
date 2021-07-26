@@ -29,10 +29,12 @@ class DualPortRam(
     val dina = Input(UInt(RAM_WIDTH.W))
     val douta = Output(UInt(RAM_WIDTH.W))
     val wea = Input(Bool())
+    val byte_ena = Input(UInt((RAM_WIDTH/8).W))
     val addrb = Input(UInt(log2Ceil(RAM_DEPTH).W))
     val dinb = Input(UInt(RAM_WIDTH.W))
     val doutb = Output(UInt(RAM_WIDTH.W))
     val web = Input(Bool())
+    val byte_enb = Input(UInt((RAM_WIDTH/8).W))
   })
 
   addResource("/DualPortRam.sv")

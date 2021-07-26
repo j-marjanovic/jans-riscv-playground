@@ -60,11 +60,11 @@ class ERVP02 extends MultiIOModule {
   mod_ctrl.io.inp("STATUS_RUNNING") := false.B // TODO:
 
   // memory
-  val mod_mem = Module(new DualPortRam(32, MEM_SIZE))
-  mod_mem.io.clk := this.clock
-  mod_mem.io.addrb := mod_ctrl.io.out("MEM_MEM_ADDR").asUInt()
+  val mod_mem = Module(new DualPortRamByteAddr(32, MEM_SIZE))
+  mod_mem.io.addrb := mod_ctrl.io.out("MEM_MEM_ADDR").asUInt() * 4.U
   mod_mem.io.dinb := mod_ctrl.io.out("MEM_MEM_DIN").asUInt()
   mod_mem.io.web := mod_ctrl.io.out("MEM_MEM_WE").asUInt().asBool()
+  mod_mem.io.byte_enb := 0xF.U
   mod_ctrl.io.inp("MEM_MEM_DOUT") := mod_mem.io.doutb
 
   // CPU
@@ -72,6 +72,7 @@ class ERVP02 extends MultiIOModule {
   mod_mem.io.addra := mod_cpu.mem_if.addr
   mod_mem.io.dina := mod_cpu.mem_if.dout
   mod_mem.io.wea := mod_cpu.mem_if.we
+  mod_mem.io.byte_ena := mod_cpu.mem_if.byte_en
   mod_cpu.mem_if.din := mod_mem.io.douta
 
   mod_cpu.enable := mod_ctrl.io.out("CONTROL_ENABLE")

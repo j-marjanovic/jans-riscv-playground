@@ -157,12 +157,14 @@ class Cpu(val mem_addr_w : Int) extends MultiIOModule {
 
   // mem connection
   when (state === State.sFetch) {
-    mem_if.addr := mod_fetch.io.mem_instr.addr / 4.U
+    mem_if.addr := mod_fetch.io.mem_instr.addr
     mem_if.dout := 0.U
     mem_if.we := false.B
+    mem_if.byte_en := 0.U
   } .otherwise {
-    mem_if.addr := mod_store_load.io.mem_data.addr / 4.U
+    mem_if.addr := mod_store_load.io.mem_data.addr
     mem_if.dout := mod_store_load.io.mem_data.dout
     mem_if.we := mod_store_load.io.mem_data.we
+    mem_if.byte_en := mod_store_load.io.mem_data.byte_en
   }
 }

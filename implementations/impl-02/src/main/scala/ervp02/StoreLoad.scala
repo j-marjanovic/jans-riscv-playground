@@ -32,6 +32,24 @@ class StoreLoad(val mem_addr_w: Int) extends Module {
   io.mem_data.dout := io.din
   io.mem_data.we := io.enable_op_store && io.act
 
+  when(io.enable_op_store) {
+    io.mem_data.byte_en := DontCare
+
+    switch(io.decoder_itype.funct3) {
+      is(0.U) {
+        io.mem_data.byte_en := 0x1.U
+      }
+      is(1.U) {
+        io.mem_data.byte_en := 0x3.U
+      }
+      is(2.U) {
+        io.mem_data.byte_en := 0xF.U
+      }
+    }
+  }.otherwise {
+    io.mem_data.byte_en := 0.U
+  }
+
   when(io.enable_op_load) {
     io.dout := DontCare
 

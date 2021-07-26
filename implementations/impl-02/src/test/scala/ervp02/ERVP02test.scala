@@ -27,6 +27,26 @@ class ERVP02test extends ChiselFlatSpec {
     assertTesterPasses(new StoreLoadTest())
   }
 
+  it should "check the Dual-Port RAM w/ byte addressing" in {
+    Driver.execute(
+      Array(
+        "--is-verbose",
+        "--backend-name",
+        "verilator",
+        "--fint-write-vcd",
+        "--test-seed",
+        "1234",
+        "--target-dir",
+        "test_run_dir/DualPortRamByteAddrTest",
+        "--top-name",
+        "DualPortRamByteAddrTest"
+      ),
+      () => new DualPortRamByteAddr(32, 1024)
+    ) { c =>
+      new DualPortRamByteAddrTest(c)
+    } should be(true)
+  }
+
   it should "check the CPU ALU" in {
     Driver.execute(
       Array(

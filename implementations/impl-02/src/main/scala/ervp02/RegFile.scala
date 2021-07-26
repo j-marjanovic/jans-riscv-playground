@@ -40,6 +40,8 @@ class RegFile(val sp_init: Int) extends Module {
   mod_mem1.io.addra := io.rd
   mod_mem1.io.dina := io.din
   mod_mem1.io.wea := io.we
+  mod_mem1.io.byte_ena := 0xf.U
+  mod_mem1.io.byte_enb := 0xf.U
 
   val rs1_prev = RegNext(io.rs1)
   mod_mem1.io.addrb := io.rs1
@@ -50,6 +52,8 @@ class RegFile(val sp_init: Int) extends Module {
   mod_mem2.io.addra := io.rd
   mod_mem2.io.dina := io.din
   mod_mem2.io.wea := io.we
+  mod_mem2.io.byte_ena := 0xf.U
+  mod_mem2.io.byte_enb := 0xf.U
 
   val rs2_prev = RegNext(io.rs2)
   mod_mem2.io.addrb := io.rs2
