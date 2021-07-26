@@ -12,7 +12,8 @@ class Cpu(val mem_addr_w : Int) extends MultiIOModule {
 
   // IO
   val mem_if = IO(new MemoryInterface(32, mem_addr_w))
-  val enable = IO(Input(Bool()))
+  val enable_pulse = IO(Input(Bool()))
+  val running_out = IO(Output(Bool()))
   val dbg_instr_done = IO(Output(Bool()))
 
   // TODO
@@ -28,6 +29,15 @@ class Cpu(val mem_addr_w : Int) extends MultiIOModule {
   val mod_jump = Module(new Jump())
   val mod_pc = Module(new PC())
 
+  // enable
+  val running = RegInit(false.B)
+  when (enable_pulse) {
+    running := true.B
+  } .elsewhen (!RegNext(mod_decoder.io.enable_op_system) && mod_decoder.io.enable_op_system) {
+    running := false.B
+  }
+  running_out := running
+
   // controller
   object State extends ChiselEnum {
     val sFetch, sDecode, sRegRead, sExec, sExec2, sStore = Value
@@ -38,7 +48,7 @@ class Cpu(val mem_addr_w : Int) extends MultiIOModule {
 
   switch(state) {
     is(State.sFetch) {
-      when(enable) {
+      when(running) {
         state := State.sDecode
       }
     }

@@ -35,7 +35,7 @@ class ERVP02 extends MultiIOModule {
       new Field("RUNNING",   hw_access = Access.W,  sw_access = Access.R,  hi =  0, lo = None),
     ),
     new Reg("CONTROL", 0x14,
-      new Field("ENABLE", hw_access = Access.R,  sw_access = Access.RW, hi = 0, lo = None)
+      new Field("ENABLE", hw_access = Access.R,  sw_access = Access.RW, hi = 0, lo = None, singlepulse = true)
     ),
     new Mem("MEM", addr = 0x1000, nr_els = MEM_SIZE, data_w = 32),
   )
@@ -54,10 +54,8 @@ class ERVP02 extends MultiIOModule {
   ctrl <> mod_ctrl.io.ctrl
 
   mod_ctrl.io.inp("VERSION_MAJOR") := 0x00.U
-  mod_ctrl.io.inp("VERSION_MINOR") := 0x01.U
+  mod_ctrl.io.inp("VERSION_MINOR") := 0x02.U
   mod_ctrl.io.inp("VERSION_PATCH") := 0x00.U
-
-  mod_ctrl.io.inp("STATUS_RUNNING") := false.B // TODO:
 
   // memory
   val mod_mem = Module(new DualPortRamByteAddr(32, MEM_SIZE))
@@ -75,7 +73,8 @@ class ERVP02 extends MultiIOModule {
   mod_mem.io.byte_ena := mod_cpu.mem_if.byte_en
   mod_cpu.mem_if.din := mod_mem.io.douta
 
-  mod_cpu.enable := mod_ctrl.io.out("CONTROL_ENABLE")
+  mod_cpu.enable_pulse := mod_ctrl.io.out("CONTROL_ENABLE")
+  mod_ctrl.io.inp("STATUS_RUNNING") := mod_cpu.running_out
 
   // UART
   uart.tx := uart.rx

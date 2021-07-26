@@ -84,7 +84,7 @@ abstract class CpuTestGeneric(c: Cpu) extends PeekPokeTester(c) {
 
   def run_test() {
     parse_cmds()
-    poke(c.enable, 1)
+    poke(c.enable_pulse, 1)
     exec_cmds()
     final_check()
   }

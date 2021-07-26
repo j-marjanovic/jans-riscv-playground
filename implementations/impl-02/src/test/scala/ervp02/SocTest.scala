@@ -5,6 +5,9 @@ package ervp02
 
 import bfmtester._
 
+import scala.collection.mutable.ListBuffer
+import scala.util.control.Breaks.{break, breakable}
+
 trait AxiLiteHelper {
   this: {
     val mod_axi_mngr: AxiLiteMaster
@@ -58,7 +61,6 @@ class SocTest(c: ERVP02) extends BfmTester(c) with AxiLiteHelper {
   assert(mem_instr.ph_entry.p_offset == 0)
   assert((mem_instr.ph_entry.p_flags.toInt & 0x5) == 0x5) // Read, Execute
 
-  val NR_INSTR_TO_EXEC = 2000
   for ((instr, i) <- mem_instr.mem.grouped(4).zipWithIndex) {
     val mem_word = instr.foldRight(0) { (a: Byte, b: Int) => (b << 8) | (a & 0xff) }
     println(f"mem addr = ${i * 4}%08x, data = ${mem_word}%08x")
@@ -74,7 +76,37 @@ class SocTest(c: ERVP02) extends BfmTester(c) with AxiLiteHelper {
   // start CPU
   write_blocking(0x14, 1)
 
-  step(NR_INSTR_TO_EXEC * 7)
+  breakable {
+    for (_ <- 0 until 1000) {
+      step(1000)
+      val status = read_blocking(0x10).toLong
+      if ((status & 1) == 0) {
+        break
+      }
+    }
+  }
 
-  // TODO: check
+  val out_buffer = ListBuffer[Char]()
+  breakable {
+    for (addr <- 0 until 64 by 4) {
+      val data = read_blocking(0x1000 + addr).toLong
+      for (bs <- 0 until 32 by 8) {
+        val c : Char = ((data >> bs) & 0xFF).toChar
+        println(s"c = ${c}")
+        if (c == 0) {
+          break
+        }
+        out_buffer += c
+      }
+    }
+  }
+
+  val out_str = out_buffer.toList.mkString
+
+  println("Output buffer:")
+  println("--- start output buffer ---")
+  println(out_str)
+  println("---  end output buffer  ---");
+
+  expect(out_str == "1 + 2 = 3, 6 * 7 = 42\n", "output string")
 }

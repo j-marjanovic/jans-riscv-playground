@@ -26,7 +26,7 @@ class Decoder extends Module {
     val enable_op_lui = Output(Bool())
     val enable_op_jal = Output(Bool())
     val enable_op_jalr = Output(Bool())
-    // TODO: more instr
+    val enable_op_system = Output(Bool())
   })
 
   object Rv32Instr extends Enumeration {
@@ -41,6 +41,7 @@ class Decoder extends Module {
     val STORE = BigInt("0100011", 2)
     val LOAD = BigInt("0000011", 2)
     val BRANCH = BigInt("1100011", 2)
+    val SYSTEM = BigInt("1110011", 2)
   }
 
   when(RegNext(io.act)) {
@@ -101,6 +102,9 @@ class Decoder extends Module {
         io.decoder_itype.imm
       )
     }
+    when(io.enable_op_system) {
+      printf("[Decoder] SYSTEM\n")
+    }
   }
 
   io.decoder_rtype := RegNext(io.instr_raw.asTypeOf(new InstrRtype))
@@ -119,5 +123,6 @@ class Decoder extends Module {
   io.enable_op_lui := RegNext(io.instr_raw(6, 0) === Rv32Instr.LUI.U)
   io.enable_op_jal := RegNext(io.instr_raw(6, 0) === Rv32Instr.JAL.U)
   io.enable_op_jalr := RegNext(io.instr_raw(6, 0) === Rv32Instr.JALR.U)
+  io.enable_op_system := RegNext(io.instr_raw(6, 0) === Rv32Instr.SYSTEM.U)
 
 }
