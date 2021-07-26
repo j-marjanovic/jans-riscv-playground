@@ -49,7 +49,7 @@ class MCR extends Bundle {
 
 class LSR extends Bundle {
   val rsvd7 = Bool()
-  val TEMP = Bool()
+  val TEMT = Bool()
   val THRE = Bool()
   val BI = Bool()
   val FE = Bool()
@@ -110,7 +110,7 @@ class Registers(val DL_INIT: Int) extends MultiIOModule {
   val reg_LSR = Wire(new LSR)
   val reg_LSR_DR = RegInit(false.B)
   reg_LSR.rsvd7 := false.B
-  reg_LSR.TEMP := LSR.TEMP
+  reg_LSR.TEMT := LSR.TEMT
   reg_LSR.THRE := LSR.THRE
   reg_LSR.BI := LSR.BI
   reg_LSR.FE := LSR.FE

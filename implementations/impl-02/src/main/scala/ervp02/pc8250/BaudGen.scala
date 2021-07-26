@@ -12,7 +12,7 @@ class BaudGen extends MultiIOModule {
 
   val cntr_reset = Wire(Bool())
   val cntr: (UInt, Bool) = Counter(0 to 65535, enable = true.B, reset = cntr_reset)
-  cntr_reset := cntr._1 === (dl - 1.U)
+  cntr_reset := cntr._1 >= (dl - 1.U)
 
   val en_x16_reg: (UInt, Bool) = Counter(0 to 15, enable = cntr_reset, reset = this.reset.asBool())
 

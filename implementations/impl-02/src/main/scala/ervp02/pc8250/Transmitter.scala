@@ -12,6 +12,7 @@ class Transmitter extends MultiIOModule {
   val en_x16 = IO(Input(Valid(UInt(4.W))))
   val data = IO(Input(Valid(UInt(8.W))))
   val SOUT = IO(Output(Bool()))
+  val busy = IO(Output(Bool()))
 
   // regs
   val data_shift_reg = Reg(UInt(8.W))
@@ -70,4 +71,6 @@ class Transmitter extends MultiIOModule {
       SOUT := true.B
     }
   }
+
+  busy := state =/= State.sIdle
 }

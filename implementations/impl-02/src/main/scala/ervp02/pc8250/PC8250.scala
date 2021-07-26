@@ -6,16 +6,6 @@ package ervp02.pc8250
 import chisel3._
 import ervp02.MemoryInterface
 
-/*
-class MemoryInterface extends Bundle {
-  val addr = Input(UInt(3.W))
-  val we = Input(Bool())
-  val din = Input(UInt(8.W))
-  val dout = Output(UInt(8.W))
-}
-
- */
-
 class UartInterface extends Bundle {
   // MODEM signals (CTS, RTS, DCD, DSR, ...) are not implemented
   val SIN = Input(Bool())
@@ -55,6 +45,8 @@ class PC8250(val DL_INIT: Int = 13888) extends Module {
 
   // TODO
   mod_regs.LSR := DontCare
+  mod_regs.LSR.THRE := mod_tx.busy
+  mod_regs.LSR.TEMT := mod_tx.busy
   mod_regs.MSR := DontCare
 
 }

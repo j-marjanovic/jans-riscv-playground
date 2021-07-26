@@ -45,7 +45,7 @@ class SocTest(c: ERVP02) extends BfmTester(c) with AxiLiteHelper {
   val mod_axi_mngr: AxiLiteMaster = BfmFactory.create_axilite_master(c.ctrl)
 
   // parse ELF
-  val mem_secs = ElfParser.parse("../../software/hello_world")
+  val mem_secs = ElfParser.parse("../../software/calc/calc") // "../../software/hello_world")
   for (mem_sec <- mem_secs) {
     println(mem_sec.toString)
   }
