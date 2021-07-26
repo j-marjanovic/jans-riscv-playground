@@ -4,6 +4,7 @@
 package ervp02
 
 import chisel3.iotesters._
+import ervp02.pc8250.PC8250
 
 class ERVP02test extends ChiselFlatSpec {
 
@@ -82,6 +83,25 @@ class ERVP02test extends ChiselFlatSpec {
       () => new Cpu(10)
     ) { c =>
       new CpuTestBranch(c)
+    } should be(true)
+  }
+
+  it should "check the PC8250 behavior" in {
+    Driver.execute(
+      Array(
+        "--backend-name",
+        "verilator",
+        "--fint-write-vcd",
+        "--test-seed",
+        "1234",
+        "--target-dir",
+        "test_run_dir/PC8250Test",
+        "--top-name",
+        "PC8250Test"
+      ),
+      () => new PC8250(5)
+    ) { c =>
+      new PC8250Test(c)
     } should be(true)
   }
 
