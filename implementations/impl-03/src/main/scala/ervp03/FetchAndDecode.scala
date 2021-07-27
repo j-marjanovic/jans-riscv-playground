@@ -34,16 +34,16 @@ class FetchAndDecode extends Module {
   // decode
   val cs = Wire(new ControlSet)
 
-  // TODO cs.enable_op_auipc := RegNext(io.instr_raw(6, 0) === Rv32Instr.AUIPC.U)
-  cs.enable_op_alu := RegNext(io.instr_raw(6, 0) === Rv32Instr.ALU.U)
-  cs.enable_op_alu_imm := RegNext(io.instr_raw(6, 0) === Rv32Instr.ALU_IMM.U)
-  cs.enable_op_store := RegNext(io.instr_raw(6, 0) === Rv32Instr.STORE.U)
-  cs.enable_op_load := RegNext(io.instr_raw(6, 0) === Rv32Instr.LOAD.U)
-  // TODO cs.enable_op_branch := RegNext(io.instr_raw(6, 0) === Rv32Instr.BRANCH.U)
-  cs.enable_op_lui := RegNext(io.instr_raw(6, 0) === Rv32Instr.LUI.U)
-  // TODO cs.enable_op_jal := RegNext(io.instr_raw(6, 0) === Rv32Instr.JAL.U)
-  cs.enable_op_jalr := RegNext(io.instr_raw(6, 0) === Rv32Instr.JALR.U)
-  // TODO cs.enable_op_system := RegNext(io.instr_raw(6, 0) === Rv32Instr.SYSTEM.U)
+  // TODO cs.enable_op_auipc := (io.mem.din(6, 0) === Rv32Instr.AUIPC.U)
+  cs.enable_op_alu := io.mem.din(6, 0) === Rv32Instr.ALU.U
+  cs.enable_op_alu_imm := io.mem.din(6, 0) === Rv32Instr.ALU_IMM.U
+  cs.enable_op_store := io.mem.din(6, 0) === Rv32Instr.STORE.U
+  cs.enable_op_load := io.mem.din(6, 0) === Rv32Instr.LOAD.U
+  // TODO cs.enable_op_branch := (io.mem.din(6, 0) === Rv32Instr.BRANCH.U)
+  cs.enable_op_lui := io.mem.din(6, 0) === Rv32Instr.LUI.U
+  // TODO cs.enable_op_jal := (io.mem.din(6, 0) === Rv32Instr.JAL.U)
+  cs.enable_op_jalr := io.mem.din(6, 0) === Rv32Instr.JALR.U
+  // TODO cs.enable_op_system := (io.mem.din(6, 0) === Rv32Instr.SYSTEM.U)
 
   // pipeline output
   io.instr_raw := RegNext(io.mem.din)

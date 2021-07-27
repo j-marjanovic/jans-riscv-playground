@@ -58,7 +58,7 @@ class ExperimentalALU extends Module {
   val ir_reg1: UInt = RegNext(io.instr_raw)
 
   //=============================================================
-  val alu_out: SInt = Reg(SInt(32.W))
+  val alu_out: SInt = WireInit(SInt(32.W), op1_reg1 + op2_reg1)
 
   switch(cs_reg1.asTypeOf(new InstrRtype).funct3) {
     is(0.U) {
