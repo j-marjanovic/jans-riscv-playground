@@ -15,7 +15,7 @@ class FetchAndDecode extends Module {
     val cs_out = Output(new ControlSet)
 
     // branches and jump
-    val branch_pc = Input(Valid(UInt(32.W)))
+    val branch_cmd = Input(new BranchCmd) //Valid(UInt(32.W)))
   })
 
   object Rv32Instr extends Enumeration {
@@ -35,9 +35,9 @@ class FetchAndDecode extends Module {
 
   val pc = RegInit(UInt(32.W), 0x200.U)
 
-  when (io.branch_pc.valid) {
-    pc := io.branch_pc.bits
-  } .otherwise {
+  when(io.branch_cmd.valid) {
+    pc := io.branch_cmd.new_pc
+  }.otherwise {
     pc := pc + 4.U
   }
 
@@ -57,12 +57,26 @@ class FetchAndDecode extends Module {
   // TODO cs.enable_op_system := (io.mem.din(6, 0) === Rv32Instr.SYSTEM.U)
   cs.pc := pc
 
+  // branch shadow
+  val br_shadow = RegInit(UInt(2.W), 0.U)
+  cs.br_shadow := br_shadow
+  when(cs.enable_op_branch) {
+    br_shadow := br_shadow + 1.U
+    cs.br_shadow := br_shadow + 1.U
+  }.elsewhen(io.branch_cmd.valid) {
+    br_shadow := br_shadow - 1.U
+    // TODO: check what happens if both come at the same time
+  }
+
+  cs.br_shadow_en_valid := RegNext(io.branch_cmd.valid)
+  cs.br_shadow_en_bits := RegNext(io.branch_cmd.br_shadow)
+
   // pipeline output
   io.instr_raw := RegNext(io.mem.din)
   io.cs_out := RegNext(cs)
 
   // memory interface
-  io.mem.addr := pc // TODO
+  io.mem.addr := pc
 
   // tie offs
   io.mem.dout := 0.U

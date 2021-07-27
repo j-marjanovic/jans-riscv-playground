@@ -4,6 +4,7 @@
 package ervp03
 
 import chisel3._
+import chisel3.util._
 
 class RegFile(val sp_init: Int) extends Module {
   val io = IO(new Bundle {
@@ -19,10 +20,15 @@ class RegFile(val sp_init: Int) extends Module {
     val rd = Input(UInt(5.W))
     val din = Input(UInt(32.W))
     val we = Input(Bool())
+    val wr_br_shadow = Input(UInt(2.W))
 
     // pipeline
     val cs_out = Output(new ControlSet)
     val instr_raw_out = Output(UInt(32.W))
+
+    // branch shadow
+    val br_shadow_dis = Input(Valid(UInt(2.W)))
+    val br_shadow_en = Input(Valid(UInt(2.W)))
   })
 
   // @formatter:off
@@ -33,6 +39,33 @@ class RegFile(val sp_init: Int) extends Module {
   )
   // @formatter:on
 
+  // branch shadow
+  val wr_shadow_disable: Vec[Bool] = RegInit(VecInit.tabulate(4)(_ => false.B))
+  when(io.br_shadow_dis.valid) {
+    wr_shadow_disable(io.br_shadow_dis.bits) := true.B
+  }.elsewhen(io.br_shadow_en.valid) {
+    wr_shadow_disable(io.br_shadow_en.bits) := false.B
+  }
+  // TODO: both at the same time
+
+  when(io.we) {
+    printf(
+      "[Reg file] write: rd = %d, data = 0x%x, br shadow = %d\n",
+      io.rd,
+      io.din,
+      io.wr_br_shadow
+    )
+
+    printf(
+      "[Reg file] wr shadow disable = %d %d %d %d\n",
+      wr_shadow_disable(3),
+      wr_shadow_disable(2),
+      wr_shadow_disable(1),
+      wr_shadow_disable(0),
+    )
+  }
+
+  // reg impl
   val rs1 = io.instr_raw.asTypeOf(new InstrRtype).rs1
   val rs2 = io.instr_raw.asTypeOf(new InstrRtype).rs2
 
@@ -40,7 +73,7 @@ class RegFile(val sp_init: Int) extends Module {
   mod_mem1.io.clk := this.clock
   mod_mem1.io.addra := io.rd
   mod_mem1.io.dina := io.din
-  mod_mem1.io.wea := io.we
+  mod_mem1.io.wea := io.we && !wr_shadow_disable(io.wr_br_shadow)
   mod_mem1.io.byte_ena := 0xf.U
   mod_mem1.io.byte_enb := 0xf.U
 
@@ -52,7 +85,7 @@ class RegFile(val sp_init: Int) extends Module {
   mod_mem2.io.clk := this.clock
   mod_mem2.io.addra := io.rd
   mod_mem2.io.dina := io.din
-  mod_mem2.io.wea := io.we
+  mod_mem2.io.wea := io.we && !wr_shadow_disable(io.wr_br_shadow)
   mod_mem2.io.byte_ena := 0xf.U
   mod_mem2.io.byte_enb := 0xf.U
 
@@ -64,35 +97,4 @@ class RegFile(val sp_init: Int) extends Module {
   io.cs_out := RegNext(io.cs_in)
   io.instr_raw_out := RegNext(io.instr_raw)
 
-  // debug
-  val debug_reg_file = RegInit(
-    VecInit.tabulate(32)(i => if (i == 2) sp_init.U(32.W) else 0.U(32.W))
-  )
-
-  when(io.we && io.rd =/= 0.U) {
-    debug_reg_file(io.rd) := io.din
-  }
-
-  when(io.dbg_print) {
-    // with `printf` one cannot be "smart" with '\n' - if the format string
-    // does not contain an '\n', it might be overwritten by some other printf
-    printf("-------------- register dump --------------\n")
-    for (i <- 0 until 32 by 8) {
-      val line_start_str = f"${i}%2d | "
-      printf(
-        f"${i}%2d | " +
-          s"${REG_NAMES(i)} %x  ${REG_NAMES(i + 1)} %x  ${REG_NAMES(i + 2)} %x  ${REG_NAMES(i + 3)} %x  " +
-          s"${REG_NAMES(i + 4)} %x  ${REG_NAMES(i + 5)} %x  ${REG_NAMES(i + 6)} %x  ${REG_NAMES(i + 7)} %x\n",
-        debug_reg_file(i),
-        debug_reg_file(i + 1),
-        debug_reg_file(i + 2),
-        debug_reg_file(i + 3),
-        debug_reg_file(i + 4),
-        debug_reg_file(i + 5),
-        debug_reg_file(i + 6),
-        debug_reg_file(i + 7)
-      )
-    }
-    printf("---------- end of register dump -----------\n")
-  }
 }

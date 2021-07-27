@@ -6,6 +6,12 @@ package ervp03
 import chisel3._
 import chisel3.util._
 
+class BranchCmd extends Bundle {
+  val valid = Bool()
+  val new_pc = UInt(32.W)
+  val br_shadow = UInt(2.W)
+}
+
 class Branch extends Module {
   val io = IO(new Bundle {
     val instr_raw = Input(UInt(32.W))
@@ -14,7 +20,7 @@ class Branch extends Module {
     val reg_din1 = Input(UInt(32.W))
     val reg_din2 = Input(UInt(32.W))
 
-    val branch_pc = Output(Valid(UInt(32.W)))
+    val branch_cmd = Output(new BranchCmd)
   })
 
   val instr: InstrBtype = WireInit(io.instr_raw.asTypeOf(new InstrBtype))
@@ -41,14 +47,20 @@ class Branch extends Module {
     }
   }
 
-  val take_reg: Bool = RegNext(take_wire && io.cs_in.enable_op_branch, false.B)
   val offs_wire: SInt = WireInit(
     Cat(instr.imm12, instr.imm11, instr.imm10_5, instr.imm4_1, 0.U(1.W))
       .asSInt()
   )
+
+  val take_reg: Bool = RegNext(take_wire && io.cs_in.enable_op_branch, false.B)
   val new_pc: UInt = RegNext(io.cs_in.pc.asSInt() + offs_wire).asUInt()
+  val cs_reg = RegNext(io.cs_in)
 
-  io.branch_pc.bits := new_pc
-  io.branch_pc.valid := take_reg
+  io.branch_cmd.new_pc := new_pc
+  io.branch_cmd.valid := take_reg
+  io.branch_cmd.br_shadow := cs_reg.br_shadow
 
+  when (io.branch_cmd.valid) {
+    printf("[Branch] take = %d, shadow = %d\n", io.branch_cmd.valid, cs_reg.br_shadow)
+  }
 }
