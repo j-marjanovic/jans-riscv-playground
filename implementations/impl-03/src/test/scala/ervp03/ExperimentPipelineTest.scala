@@ -53,7 +53,7 @@ class ExperimentPipelineTest(c: ExperimentPipeline) extends PeekPokeTester(c) {
       | 240:	00a00513          	li	a0,10
       |
       |00000244 <exit>:
-      | 244:	00000013          	nop
+      | 244:	0FF00513          	li	a0,0xff
       | 248:	00000013          	nop
       | 24c:	00000013          	nop
       | 250:	00000013          	nop
@@ -65,10 +65,21 @@ class ExperimentPipelineTest(c: ExperimentPipeline) extends PeekPokeTester(c) {
   val instrs: mutable.Map[Int, (BigInt, String)] =
     DisassemblyParser.parse_instrs(instrs_txt)
 
-  for (instr <- instrs.toSeq.sortBy(_._1).map(_._2)) {
+  def step_single(): Unit = {
+    val addr = peek(c.io.mem.addr)
+    println(f"addr = ${addr}%x")
+    val instr = instrs(addr.toInt)
     println(s"instr = ${instr._2}")
     poke(c.io.mem.din, instr._1)
-    step(1)
+    super.step(1)
   }
+
+  override def step(n: Int): Unit ={
+    for (_ <- 0 until n) {
+      step_single()
+    }
+  }
+
+  step(20)
 
 }

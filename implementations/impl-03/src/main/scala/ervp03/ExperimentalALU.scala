@@ -40,7 +40,7 @@ class ExperimentalALU extends Module {
 
   val din1: SInt = WireInit(io.reg_din1).asSInt()
 
-  val op1 = MuxCase(
+  val op2 = MuxCase(
     din1,
     Array(
       io.cs_in.enable_op_alu -> din1,
@@ -52,22 +52,22 @@ class ExperimentalALU extends Module {
     )
   )
 
-  val op1_reg1: SInt = RegNext(op1)
-  val op2_reg1: SInt = RegNext(io.reg_din2.asSInt())
+  val op1_reg1: SInt = RegNext(io.reg_din1.asSInt())
+  val op2_reg1: SInt = RegNext(op2)
   val cs_reg1: ControlSet = RegNext(io.cs_in)
   val ir_reg1: UInt = RegNext(io.instr_raw)
-
+  val ir_reg1_rtype = WireInit(new InstrRtype, ir_reg1.asTypeOf(new InstrRtype))
   //=============================================================
   val alu_out: SInt = WireInit(SInt(32.W), op1_reg1 + op2_reg1)
 
-  switch(cs_reg1.asTypeOf(new InstrRtype).funct3) {
+  val FUNCT7_SUB = BigInt("0100000", 2).U
+
+  switch(ir_reg1_rtype.funct3) {
     is(0.U) {
       when(cs_reg1.enable_op_jalr) {
         alu_out := op1_reg1 + op2_reg1
       }.elsewhen(
-          cs_reg1.enable_op_alu && (cs_reg1
-            .asTypeOf(new InstrRtype)
-            .funct7 === BigInt("0100000", 2).U)
+          cs_reg1.enable_op_alu && (ir_reg1_rtype.funct7 === FUNCT7_SUB)
         ) {
           alu_out := op1_reg1 - op2_reg1
         }
