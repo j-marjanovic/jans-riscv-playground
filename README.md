@@ -4,6 +4,10 @@ Welcome to my playground for the RISC-V!
 
 ## Implementations
 
+<div align="center">
+  <img src="./docs/ERVP_logo.png">
+</div>
+
 ERVP stands for Experimental RISC-V Processor
 
 ### ERVP-01
