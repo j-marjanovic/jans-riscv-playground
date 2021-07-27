@@ -9,6 +9,20 @@ class ERVP03test extends ChiselFlatSpec {
 
   it should "check the pipeline behavior" in {
     Driver.execute(
+      /*
+      Array(
+        "--backend-name",
+        "treadle",
+        // "--tr-verbose",
+        "--tr-random-seed",
+        "1234",
+        "--tr-write-vcd",
+        // "--target-dir",
+        // "test_run_dir/ExperimentPipelineTest",
+        "--top-name",
+        "ExperimentPipelineTest",
+      ),
+      */
       Array(
         "--is-verbose",
         "--backend-name",

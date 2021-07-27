@@ -44,9 +44,9 @@ class RegFile(val sp_init: Int) extends Module {
   mod_mem1.io.byte_ena := 0xf.U
   mod_mem1.io.byte_enb := 0xf.U
 
-  val rs1_prev = RegNext(rs1)
+  val rs1_prev_is_0: Bool = RegNext(rs1 === 0.U)
   mod_mem1.io.addrb := rs1
-  io.dout1 := Mux(rs1_prev === 0.U, 0.U, mod_mem1.io.doutb)
+  io.dout1 := Mux(rs1_prev_is_0, 0.U, mod_mem1.io.doutb)
 
   val mod_mem2 = Module(new DualPortRam(32, 32, 1, 2, sp_init))
   mod_mem2.io.clk := this.clock
@@ -56,9 +56,9 @@ class RegFile(val sp_init: Int) extends Module {
   mod_mem2.io.byte_ena := 0xf.U
   mod_mem2.io.byte_enb := 0xf.U
 
-  val rs2_prev = RegNext(rs2)
+  val rs2_prev_is_0: Bool = RegNext(rs2 === 0.U)
   mod_mem2.io.addrb := rs2
-  io.dout2 := Mux(rs2_prev === 0.U, 0.U, mod_mem2.io.doutb)
+  io.dout2 := Mux(rs2_prev_is_0, 0.U, mod_mem2.io.doutb)
 
   // pipeline
   io.cs_out := RegNext(io.cs_in)

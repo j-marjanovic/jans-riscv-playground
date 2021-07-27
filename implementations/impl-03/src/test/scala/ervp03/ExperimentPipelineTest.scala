@@ -42,34 +42,25 @@ class ExperimentPipelineTest(c: ExperimentPipeline) extends PeekPokeTester(c) {
       | 214:	00000013          	nop
       | 218:	00000013          	nop
       | 21c:	00000013          	nop
-      | 220:	00c586b3          	add	a3,a1,a2
-      | 224:	00000013          	nop
-      | 228:	00000013          	nop
-      | 22c:	00000013          	nop
-      | 230:	00000013          	nop
-      | 234:	00000013          	nop
-      | 238:	00000013          	nop
-      | 23c:	00000013          	nop
-      | 240:	00000013          	nop
+      | 220:	02b51263          	bne	a0,a1,244 <exit>
+      | 224:	00300513          	li	a0,3
+      | 228:	00400513          	li	a0,4
+      | 22c:	00500513          	li	a0,5
+      | 230:	00600513          	li	a0,6
+      | 234:	00700513          	li	a0,7
+      | 238:	00800513          	li	a0,8
+      | 23c:	00900513          	li	a0,9
+      | 240:	00a00513          	li	a0,10
+      |
+      |00000244 <exit>:
       | 244:	00000013          	nop
       | 248:	00000013          	nop
-      | 24c:	00b51e63          	bne	a0,a1,268 <exit>
-      | 250:	00300513          	li	a0,3
-      | 254:	00400513          	li	a0,4
-      | 258:	00500513          	li	a0,5
-      | 25c:	00600513          	li	a0,6
-      | 260:	00700513          	li	a0,7
-      | 264:	00800513          	li	a0,8
-      |
-      |00000268 <exit>:
-      | 268:	00000013          	nop
-      | 26c:	00000013          	nop
-      | 270:	00000013          	nop
-      | 274:	00000013          	nop
-      | 278:	00000013          	nop
-      | 27c:	00000013          	nop
-      | 280:	05d00893          	li	a7,93
-      | 284:	00000073          	ecall""".stripMargin
+      | 24c:	00000013          	nop
+      | 250:	00000013          	nop
+      | 254:	00000013          	nop
+      | 258:	00000013          	nop
+      | 25c:	05d00893          	li	a7,93
+      | 260:	00000073          	ecall""".stripMargin
 
   val instrs: mutable.Map[Int, (BigInt, String)] =
     DisassemblyParser.parse_instrs(instrs_txt)

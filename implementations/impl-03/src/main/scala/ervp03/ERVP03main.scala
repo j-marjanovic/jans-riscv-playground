@@ -7,5 +7,8 @@ import chisel3.stage.ChiselStage
 
 object ERVP03main extends App {
   (new ChiselStage)
-    .emitVerilog(new ExperimentPipeline, Array[String]("--target-dir", "output/ervp03/experiment") ++ args)
+    .emitVerilog(
+      new ExperimentPipeline,
+      Array[String]("--target-dir", "output/ervp03/experiment") ++ args
+    )
 }
