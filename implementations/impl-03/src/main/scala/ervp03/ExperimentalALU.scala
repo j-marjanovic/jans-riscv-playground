@@ -38,12 +38,12 @@ class ExperimentalALU extends Module {
     (io.instr_raw.asTypeOf(new InstrUtype).imm20 << 12).asSInt()
   )
 
-  val din1: SInt = WireInit(io.reg_din1).asSInt()
+  val op1: SInt = WireInit(io.reg_din1).asSInt()
 
-  val op2 = MuxCase(
-    din1,
+  val op2 : SInt = MuxCase(
+    io.reg_din2.asSInt(),
     Array(
-      io.cs_in.enable_op_alu -> din1,
+      io.cs_in.enable_op_alu -> io.reg_din2.asSInt(),
       io.cs_in.enable_op_alu_imm -> itype_imm,
       io.cs_in.enable_op_load -> itype_imm,
       io.cs_in.enable_op_store -> store_imm,
@@ -52,7 +52,7 @@ class ExperimentalALU extends Module {
     )
   )
 
-  val op1_reg1: SInt = RegNext(io.reg_din1.asSInt())
+  val op1_reg1: SInt = RegNext(op1)
   val op2_reg1: SInt = RegNext(op2)
   val cs_reg1: ControlSet = RegNext(io.cs_in)
   val ir_reg1: UInt = RegNext(io.instr_raw)

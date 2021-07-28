@@ -17,5 +17,10 @@ class ControlSet extends Bundle {
   val br_shadow = UInt(2.W)
   val br_shadow_en = ValidNoDir(UInt(2.W))
 
+  val valid = Bool()
+  val reg_dep_lock_rs1 = ValidNoDir(UInt(5.W))
+  val reg_dep_lock_rs2 = ValidNoDir(UInt(5.W))
+  val reg_dep_lock_rd = ValidNoDir(UInt(5.W))
+
   val pc = UInt(32.W)
 }

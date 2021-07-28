@@ -46,4 +46,25 @@ class ERVP03test extends ChiselFlatSpec {
       new ExperimentPipelineTestShadow1(c)
     } should be(true)
   }
+
+  it should "check the branch shadow - reg deps" in {
+    Driver.execute(
+      Array(
+        // "--is-verbose",
+        "--backend-name",
+        "verilator",
+        "--fint-write-vcd",
+        "--test-seed",
+        "1234",
+        "--target-dir",
+        "test_run_dir/ExperimentPipelineTest",
+        "--top-name",
+        "ExperimentPipelineTest"
+      ),
+      () => new ExperimentPipeline
+    ) { c =>
+      new ExperimentalPipelineTestDeps(c)
+    } should be(true)
+  }
+
 }

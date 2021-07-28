@@ -20,6 +20,8 @@ class ExperimentPipeline extends Module {
   val mod_branch = Module(new Branch)
 
   mod_fetch_dec.io.mem <> io.mem
+  mod_fetch_dec.io.branch_cmd := mod_branch.io.branch_cmd
+  mod_fetch_dec.io.cs_back := RegNext(mod_alu.io.cs_out)
 
   mod_reg_file.io.dbg_print := false.B
   mod_reg_file.io.instr_raw := mod_fetch_dec.io.instr_raw
@@ -34,11 +36,11 @@ class ExperimentPipeline extends Module {
   mod_branch.io.cs_in := mod_reg_file.io.cs_out
   mod_branch.io.reg_din1 := mod_reg_file.io.dout1
   mod_branch.io.reg_din2 := mod_reg_file.io.dout2
-  mod_fetch_dec.io.branch_cmd := mod_branch.io.branch_cmd
 
   mod_reg_file.io.rd := mod_alu.io.instr_raw_out.asTypeOf(new InstrRtype).rd
   mod_reg_file.io.din := mod_alu.io.dout
-  mod_reg_file.io.we := mod_alu.io.cs_out.enable_op_alu || mod_alu.io.cs_out.enable_op_alu_imm
+  mod_reg_file.io.we :=
+    mod_alu.io.cs_out.valid && (mod_alu.io.cs_out.enable_op_alu || mod_alu.io.cs_out.enable_op_alu_imm)
   mod_reg_file.io.wr_br_shadow := mod_alu.io.cs_out.br_shadow
   mod_reg_file.io.br_shadow_dis.valid := mod_branch.io.branch_cmd.valid
   mod_reg_file.io.br_shadow_dis.bits := mod_branch.io.branch_cmd.br_shadow

@@ -5,6 +5,7 @@ package ervp03
 
 import chisel3._
 import chisel3.util._
+import org.scalacheck.Prop.False
 
 class FetchAndDecode extends Module {
   val io = IO(new Bundle {
@@ -15,7 +16,8 @@ class FetchAndDecode extends Module {
     val cs_out = Output(new ControlSet)
 
     // branches and jump
-    val branch_cmd = Input(new BranchCmd) //Valid(UInt(32.W)))
+    val branch_cmd = Input(new BranchCmd)
+    val cs_back = Input(new ControlSet)
   })
 
   object Rv32Instr extends Enumeration {
@@ -34,15 +36,15 @@ class FetchAndDecode extends Module {
   }
 
   val pc = RegInit(UInt(32.W), 0x200.U)
-
-  when(io.branch_cmd.valid) {
-    pc := io.branch_cmd.new_pc
-  }.otherwise {
-    pc := pc + 4.U
-  }
-
-  // decode
   val cs = Wire(new ControlSet)
+
+  when (cs.valid) {
+    when(io.branch_cmd.valid) {
+      pc := io.branch_cmd.new_pc
+    }.otherwise {
+      pc := pc + 4.U
+    }
+  }
 
   // control set
   // TODO cs.enable_op_auipc := (io.mem.din(6, 0) === Rv32Instr.AUIPC.U)
@@ -74,6 +76,60 @@ class FetchAndDecode extends Module {
   // pipeline output
   io.instr_raw := RegNext(io.mem.din)
   io.cs_out := RegNext(cs)
+
+  // reg allocation
+  val instr_rtype = WireInit(io.mem.din.asTypeOf(new InstrRtype))
+  val reg_locks: Vec[Bool] = RegInit(VecInit(Seq.fill(32)(false.B)))
+
+  val rs1_free = WireInit(instr_rtype.rs1 === 0.U || !reg_locks(instr_rtype.rs1))
+  val rs2_free = WireInit(instr_rtype.rs2 === 0.U || !reg_locks(instr_rtype.rs2))
+  val rd_free = WireInit(instr_rtype.rd === 0.U || !reg_locks(instr_rtype.rd))
+
+  cs.valid := false.B
+  cs.reg_dep_lock_rs1.valid := false.B
+  cs.reg_dep_lock_rs2.valid := false.B
+  cs.reg_dep_lock_rd.valid := false.B
+  cs.reg_dep_lock_rs1.bits := DontCare
+  cs.reg_dep_lock_rs2.bits := DontCare
+  cs.reg_dep_lock_rd.bits := DontCare
+
+  when (cs.enable_op_alu) {
+    cs.reg_dep_lock_rs1.valid := true.B
+    cs.reg_dep_lock_rs2.valid := true.B
+    cs.reg_dep_lock_rd.valid := true.B
+    cs.reg_dep_lock_rs1.bits := instr_rtype.rs1
+    cs.reg_dep_lock_rs2.bits := instr_rtype.rs2
+    cs.reg_dep_lock_rd.bits := instr_rtype.rd
+    when (rs1_free && rs2_free && rd_free) {
+      printf("LOCK LOCK LOCK ALU\n")
+      reg_locks(instr_rtype.rs1) := true.B
+      reg_locks(instr_rtype.rs2) := true.B
+      reg_locks(instr_rtype.rd) := true.B
+      cs.valid := true.B
+    }
+  } .elsewhen (cs.enable_op_alu_imm) {
+    cs.reg_dep_lock_rs1.valid := true.B
+    cs.reg_dep_lock_rd.valid := true.B
+    cs.reg_dep_lock_rs1.bits := instr_rtype.rs1
+    cs.reg_dep_lock_rd.bits := instr_rtype.rd
+    when (rs1_free && rd_free) {
+      printf("LOCK LOCK LOCK ALU imm\n")
+      reg_locks(instr_rtype.rs1) := true.B
+      reg_locks(instr_rtype.rd) := true.B
+      cs.valid := true.B
+    }
+  }
+
+  // TODO: check the behavior when both arrive at the same time
+  when (io.cs_back.valid && io.cs_back.reg_dep_lock_rs1.valid) {
+    reg_locks(io.cs_back.reg_dep_lock_rs1.bits) := false.B
+  }
+  when (io.cs_back.valid && io.cs_back.reg_dep_lock_rs2.valid) {
+    reg_locks(io.cs_back.reg_dep_lock_rs2.bits) := false.B
+  }
+  when (io.cs_back.valid && io.cs_back.reg_dep_lock_rd.valid) {
+    reg_locks(io.cs_back.reg_dep_lock_rd.bits) := false.B
+  }
 
   // memory interface
   io.mem.addr := pc
