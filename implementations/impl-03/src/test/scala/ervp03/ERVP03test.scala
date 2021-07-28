@@ -7,24 +7,10 @@ import chisel3.iotesters._
 
 class ERVP03test extends ChiselFlatSpec {
 
-  it should "check the pipeline behavior" in {
+  it should "check the branch shadow - shadow completeness" in {
     Driver.execute(
-      /*
       Array(
-        "--backend-name",
-        "treadle",
-        // "--tr-verbose",
-        "--tr-random-seed",
-        "1234",
-        "--tr-write-vcd",
-        // "--target-dir",
-        // "test_run_dir/ExperimentPipelineTest",
-        "--top-name",
-        "ExperimentPipelineTest",
-      ),
-      */
-      Array(
-        "--is-verbose",
+        // "--is-verbose",
         "--backend-name",
         "verilator",
         "--fint-write-vcd",
@@ -37,7 +23,27 @@ class ERVP03test extends ChiselFlatSpec {
       ),
       () => new ExperimentPipeline
     ) { c =>
-      new ExperimentPipelineTest(c)
+      new ExperimentPipelineTestShadow0(c)
+    } should be(true)
+  }
+
+  it should "check the branch shadow - shadow edge" in {
+    Driver.execute(
+      Array(
+        // "--is-verbose",
+        "--backend-name",
+        "verilator",
+        "--fint-write-vcd",
+        "--test-seed",
+        "1234",
+        "--target-dir",
+        "test_run_dir/ExperimentPipelineTest",
+        "--top-name",
+        "ExperimentPipelineTest"
+      ),
+      () => new ExperimentPipeline
+    ) { c =>
+      new ExperimentPipelineTestShadow1(c)
     } should be(true)
   }
 }

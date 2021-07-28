@@ -10,6 +10,8 @@ class ExperimentPipeline extends Module {
     val mem = new MemoryInterface(32, 32)
 
     val dbg_out = Output(UInt(32.W))
+
+    val dbg_access = new DebugRegFile
   })
 
   val mod_fetch_dec = Module(new FetchAndDecode())
@@ -42,6 +44,7 @@ class ExperimentPipeline extends Module {
   mod_reg_file.io.br_shadow_dis.bits := mod_branch.io.branch_cmd.br_shadow
   mod_reg_file.io.br_shadow_en.valid := mod_alu.io.cs_out.br_shadow_en_valid
   mod_reg_file.io.br_shadow_en.bits := mod_alu.io.cs_out.br_shadow_en_bits
+  mod_reg_file.io.dbg_access <> io.dbg_access
 
   io.dbg_out := mod_alu.io.dout
 }

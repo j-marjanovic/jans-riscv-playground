@@ -6,6 +6,11 @@ package ervp03
 import chisel3._
 import chisel3.util._
 
+class DebugRegFile extends Bundle {
+  val addr = Input(UInt(4.W))
+  val dout = Output(UInt(32.W))
+}
+
 class RegFile(val sp_init: Int) extends Module {
   val io = IO(new Bundle {
     val dbg_print = Input(Bool())
@@ -29,6 +34,9 @@ class RegFile(val sp_init: Int) extends Module {
     // branch shadow
     val br_shadow_dis = Input(Valid(UInt(2.W)))
     val br_shadow_en = Input(Valid(UInt(2.W)))
+
+    // debug access
+    val dbg_access = new DebugRegFile
   })
 
   // @formatter:off
@@ -96,5 +104,17 @@ class RegFile(val sp_init: Int) extends Module {
   // pipeline
   io.cs_out := RegNext(io.cs_in)
   io.instr_raw_out := RegNext(io.instr_raw)
+
+  // debug
+  val mod_mem_dbg = Module(new DualPortRam(32, 32, 1, 2, sp_init))
+  mod_mem_dbg.io.clk := this.clock
+  mod_mem_dbg.io.addra := io.rd
+  mod_mem_dbg.io.dina := io.din
+  mod_mem_dbg.io.wea := io.we && !wr_shadow_disable(io.wr_br_shadow)
+  mod_mem_dbg.io.byte_ena := 0xf.U
+  mod_mem_dbg.io.byte_enb := 0xf.U
+
+  mod_mem_dbg.io.addrb := io.dbg_access.addr
+  io.dbg_access.dout := mod_mem_dbg.io.doutb
 
 }
