@@ -4,7 +4,6 @@
 package ervp03
 
 import chisel3._
-import chisel3.util._
 
 class ControlSet extends Bundle {
   val enable_op_alu = Bool()
@@ -16,8 +15,7 @@ class ControlSet extends Bundle {
   val enable_op_store = Bool()
 
   val br_shadow = UInt(2.W)
-  //val br_shadow_en = Valid(UInt(2.W))
-  val br_shadow_en_bits = UInt(2.W)
-  val br_shadow_en_valid = Bool()
+  val br_shadow_en = ValidNoDir(UInt(2.W))
+
   val pc = UInt(32.W)
 }

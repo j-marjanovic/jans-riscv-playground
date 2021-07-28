@@ -3,11 +3,6 @@
 
 package ervp03
 
-import chisel3.iotesters.PeekPokeTester
-
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
-
 class ExperimentPipelineTestShadow1(c: ExperimentPipeline) extends ExperimentPipelineTestGeneric(c) {
 
   val instrs_txt =
@@ -19,7 +14,7 @@ class ExperimentPipelineTestShadow1(c: ExperimentPipeline) extends ExperimentPip
       | 210:	00000013          	nop
       | 214:	00000013          	nop
       | 218:	00000013          	nop
-      | 21c:	00000013          	nop
+      | 21c:	0ab00593          	li	a1,171
       | 220:	02b51263          	bne	a0,a1,244 <exit>
       | 224:	00300513          	li	a0,3
       | 228:	00400513          	li	a0,4
@@ -46,5 +41,6 @@ class ExperimentPipelineTestShadow1(c: ExperimentPipeline) extends ExperimentPip
   mem_en = false
   val regs = dump_regs()
   expect(regs(10) == 0xFF, "reg a0")
+  expect(regs(11) == 0xab, "reg a1")
 
 }

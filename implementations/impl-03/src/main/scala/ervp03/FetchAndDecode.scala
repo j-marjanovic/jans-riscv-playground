@@ -68,8 +68,8 @@ class FetchAndDecode extends Module {
     // TODO: check what happens if both come at the same time
   }
 
-  cs.br_shadow_en_valid := RegNext(io.branch_cmd.valid)
-  cs.br_shadow_en_bits := RegNext(io.branch_cmd.br_shadow)
+  cs.br_shadow_en.valid := RegNext(io.branch_cmd.valid)
+  cs.br_shadow_en.bits := RegNext(io.branch_cmd.br_shadow)
 
   // pipeline output
   io.instr_raw := RegNext(io.mem.din)
