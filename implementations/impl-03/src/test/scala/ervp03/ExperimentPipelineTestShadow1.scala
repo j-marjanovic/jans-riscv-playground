@@ -37,9 +37,10 @@ class ExperimentPipelineTestShadow1(c: ExperimentPipeline) extends ExperimentPip
 
 
   //
-  step(20)
+  step(30)
   mem_en = false
   val regs = dump_regs()
+  println(s"regs = ${regs}")
   expect(regs(10) == 0xFF, "reg a0")
   expect(regs(11) == 0xab, "reg a1")
 

@@ -38,12 +38,10 @@ class FetchAndDecode extends Module {
   val pc = RegInit(UInt(32.W), 0x200.U)
   val cs = Wire(new ControlSet)
 
-  when (cs.valid) {
-    when(io.branch_cmd.valid) {
-      pc := io.branch_cmd.new_pc
-    }.otherwise {
-      pc := pc + 4.U
-    }
+  when(io.branch_cmd.valid) {
+    pc := io.branch_cmd.new_pc
+  } .elsewhen(cs.valid) {
+    pc := pc + 4.U
   }
 
   // control set
@@ -62,10 +60,10 @@ class FetchAndDecode extends Module {
   // branch shadow
   val br_shadow = RegInit(UInt(2.W), 0.U)
   cs.br_shadow := br_shadow
-  when(cs.enable_op_branch) {
+  when(cs.enable_op_branch && cs.valid) {
     br_shadow := br_shadow + 1.U
     cs.br_shadow := br_shadow + 1.U
-  }.elsewhen(io.branch_cmd.valid) {
+  }.elsewhen(io.branch_cmd.valid && io.cs_back.valid) {
     br_shadow := br_shadow - 1.U
     // TODO: check what happens if both come at the same time
   }
@@ -101,7 +99,6 @@ class FetchAndDecode extends Module {
     cs.reg_dep_lock_rs2.bits := instr_rtype.rs2
     cs.reg_dep_lock_rd.bits := instr_rtype.rd
     when (rs1_free && rs2_free && rd_free) {
-      printf("LOCK LOCK LOCK ALU\n")
       reg_locks(instr_rtype.rs1) := true.B
       reg_locks(instr_rtype.rs2) := true.B
       reg_locks(instr_rtype.rd) := true.B
@@ -113,9 +110,18 @@ class FetchAndDecode extends Module {
     cs.reg_dep_lock_rs1.bits := instr_rtype.rs1
     cs.reg_dep_lock_rd.bits := instr_rtype.rd
     when (rs1_free && rd_free) {
-      printf("LOCK LOCK LOCK ALU imm\n")
       reg_locks(instr_rtype.rs1) := true.B
       reg_locks(instr_rtype.rd) := true.B
+      cs.valid := true.B
+    }
+  } .elsewhen (cs.enable_op_branch) {
+    cs.reg_dep_lock_rs1.valid := true.B
+    cs.reg_dep_lock_rs2.valid := true.B
+    cs.reg_dep_lock_rs1.bits := instr_rtype.rs1
+    cs.reg_dep_lock_rs2.bits := instr_rtype.rs2
+    when (rs1_free && rd_free) {
+      reg_locks(instr_rtype.rs1) := true.B
+      reg_locks(instr_rtype.rs2) := true.B
       cs.valid := true.B
     }
   }

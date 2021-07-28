@@ -21,6 +21,7 @@ class Branch extends Module {
     val reg_din2 = Input(UInt(32.W))
 
     val branch_cmd = Output(new BranchCmd)
+    val cs_out = Output(new ControlSet)
   })
 
   val instr: InstrBtype = WireInit(io.instr_raw.asTypeOf(new InstrBtype))
@@ -52,9 +53,10 @@ class Branch extends Module {
       .asSInt()
   )
 
-  val take_reg: Bool = RegNext(take_wire && io.cs_in.enable_op_branch, false.B)
+  val take_reg: Bool = RegNext(take_wire && io.cs_in.enable_op_branch && io.cs_in.valid, false.B)
   val new_pc: UInt = RegNext(io.cs_in.pc.asSInt() + offs_wire).asUInt()
   val cs_reg = RegNext(io.cs_in)
+  io.cs_out := cs_reg
 
   io.branch_cmd.new_pc := new_pc
   io.branch_cmd.valid := take_reg

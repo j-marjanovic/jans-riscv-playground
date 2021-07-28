@@ -42,7 +42,7 @@ class ExperimentPipeline extends Module {
   mod_reg_file.io.we :=
     mod_alu.io.cs_out.valid && (mod_alu.io.cs_out.enable_op_alu || mod_alu.io.cs_out.enable_op_alu_imm)
   mod_reg_file.io.wr_br_shadow := mod_alu.io.cs_out.br_shadow
-  mod_reg_file.io.br_shadow_dis.valid := mod_branch.io.branch_cmd.valid
+  mod_reg_file.io.br_shadow_dis.valid := mod_branch.io.branch_cmd.valid && mod_branch.io.cs_out.valid
   mod_reg_file.io.br_shadow_dis.bits := mod_branch.io.branch_cmd.br_shadow
   mod_reg_file.io.br_shadow_en <> mod_alu.io.cs_out.br_shadow_en
   mod_reg_file.io.dbg_access <> io.dbg_access
