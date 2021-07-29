@@ -10,6 +10,12 @@ Welcome to my playground for the RISC-V!
 
 ERVP stands for Experimental RISC-V Processor
 
+### ERVP-02
+
+ERVP-02 in Vivado Block Diagram:
+
+![ERVP-02](docs/ervp02_vivado.png)
+
 ### ERVP-01
 
 * This is my first attempt at writing a RISC-V processor
@@ -26,6 +32,10 @@ ERVP stands for Experimental RISC-V Processor
 ![ERVP-01 output](docs/ervp01_output.png)
 
 ## Notes
+
+### 2021-07-27
+
+https://github.com/chipsalliance/treadle/blob/master/src/main/scala/treadle/TreadleOptions.scala
 
 ### 2021-07-23
 
