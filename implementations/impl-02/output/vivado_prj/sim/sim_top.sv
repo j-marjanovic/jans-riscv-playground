@@ -35,8 +35,10 @@ module sim_top;
 
     #(500ns);
 
-    DUT.system_i.zynq_ultra_ps_e_0.inst.read_data(32'ha0000000, 4, read_data, resp);
-    DUT.system_i.zynq_ultra_ps_e_0.inst.read_data(32'ha0001000, 4, read_data, resp);
+    DUT.system_i.zynq_ultra_ps_e_0.inst.read_data(32'ha1000000, 4, read_data, resp);
+    $display("%t ID reg = %x", $time, read_data);
+    // DUT.system_i.zynq_ultra_ps_e_0.inst.read_data(32'ha1000004, 4, read_data, resp);
+    // $display("%t version = %x", $time, read_data);
     #(500ns);
 
     $display("%t Simulation done", $time);
